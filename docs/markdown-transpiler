@@ -1,0 +1,24 @@
+#!/bin/python
+
+import sys
+import re
+
+plain_markdown = True
+
+for line in sys.stdin:
+    line = line.strip()
+
+    if line.startswith("```puml"):
+        plain_markdown = False
+        continue
+    elif line.startswith("```"): 
+        plain_markdown = True
+        continue
+
+    if plain_markdown:
+        print(line)
+    else:
+        rematch = re.match(r"^@startuml (.+)", line)
+        if rematch:
+            diagram_name = rematch.group(1)
+            print(f"![{diagram_name}]({diagram_name}.svg)")
