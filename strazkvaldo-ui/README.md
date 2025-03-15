@@ -2,6 +2,10 @@
 
 ## setup lokálne prostredie
 
+| softvér | verzia |
+| ------- | ------ |
+| nginx | 1.26 |
+
 ### NGINX
 
 #### create __`/etc/nginx/sites-available/strazkvaldo.local.conf`__
@@ -17,6 +21,8 @@ server {
     index index.html;
     try_files $uri $uri/ =404;
   }
+
+  return 301 $scheme://$server_name/ui;
 }
 ```
 #### symlink __`/etc/nginx/sites-enabled/strazkvaldo.local.conf`__
@@ -39,7 +45,3 @@ nginx -s reload
 127.0.0.1 strazkvaldo.local
 ::1 strazkvaldo.local
 ```
-
-
-
-### NGINX 
