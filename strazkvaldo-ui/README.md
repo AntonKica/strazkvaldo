@@ -22,7 +22,7 @@ server {
     try_files $uri $uri/ =404;
   }
 
-  return 301 $scheme://$server_name/ui;
+  return 301 $scheme://$server_name/ui/;
 }
 ```
 #### symlink __`/etc/nginx/sites-enabled/strazkvaldo.local.conf`__
