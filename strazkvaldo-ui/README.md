@@ -22,7 +22,7 @@ server {
     try_files $uri $uri/ =404;
   }
 
-  location /ui {
+  location / {
     return 301 $scheme://$server_name/ui/;
   }
 }
