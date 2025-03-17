@@ -72,9 +72,9 @@ user --> ucUpcomingActivityList
 user --> ucFinishedActivityList
 user --> ucNotificationSettings
 
-ucLogin <-- admin
-ucUserManagement <-- admin
-ucEnumManagement <-- admin
+admin --> ucLogin
+admin --> ucUserManagement
+admin --> ucEnumManagement
 @enduml
 ```
 
@@ -205,14 +205,14 @@ Architektúra aplikácie bude realizovaná _client-server_ architektúrou ako SP
 
 | týždeň | od | do | funkcionalita |
 | ------ | -- | -- | ------------- |
-| 4 | 17.03 | 23.03 | oprava špecifikácie a príprava vývojového prostredia |
-| 5 | 24.03 | 30.03 | implementácia kostry užívateľského rozhrania |
-| 6 | 31.03 | 06.04 | implementácia CRUD pre entity aktivít na backend-e |
-| 7 | 07.04 | 13.04 | implementácia administrátorského rozhrania a autentifikácie používateľov|
-| 8 | 14.04 | 20.04 | konfigurácia a príprava produkčného prostredia |
-| 9 (beta verzia) | 21.04 | 27.04 | implementácia nastavení, hlásení a upozornení |
-| 10 | 28.04 | 04.05 | implementácia plnohodnotného užívateľského rozhrania |
-| 11 (finálna verzia)| 05.05 | 11.05 | implementácia drobných features, ladenie a testovanie funkčnosti |
+| 4 | 10.03 | 16.03 | oprava špecifikácie a príprava vývojového prostredia |
+| 5 | 17.03 | 23.03 | implementácia kostry užívateľského rozhrania |
+| 6 | 24.03 | 30.03 | implementácia CRUD pre entity aktivít na backend-e |
+| 7 | 31.03 | 06.04 | implementácia administrátorského rozhrania a autentifikácie používateľov|
+| 8 | 07.04 | 13.04 | konfigurácia a príprava produkčného prostredia |
+| 9 (beta verzia) | 14.04 | 20.04 | implementácia nastavení, hlásení a upozornení |
+| 10 | 21.04 | 27.04 | implementácia plnohodnotného užívateľského rozhrania |
+| 11 (finálna verzia)| 28.04 | 04.05 | implementácia drobných features, ladenie a testovanie funkčnosti |
 
 
 ### Milníky
