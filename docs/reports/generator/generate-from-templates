@@ -44,9 +44,10 @@ SEMESTER_START_DATE='2025-2-17'
 
 REPORT_WEEK_FILE='report_week.md'
 for REPORT_WEEK in {4..13}; do
-  REPORT_DATE_FROM=$(date +%d.%m. -d "$SEMESTER_START_DATE + $REPORT_WEEK week")
-  REPORT_DATE_TO=$(date +%d.%m.%Y -d "$SEMESTER_START_DATE + $REPORT_WEEK week + 6 day")
+  # REPORT_WEEK is one off
+  REPORT_DATE_FROM=$(date +%d.%m. -d "$SEMESTER_START_DATE + $((REPORT_WEEK - 1)) week")
+  REPORT_DATE_TO=$(date +%d.%m.%Y -d "$SEMESTER_START_DATE + $((REPORT_WEEK - 1)) week + 6 day")
 
-  OUTPUT_FILE_NAME=$(printf "$OUT_DIR/report_week_%02d.md" $REPORT_WEEK)
+  OUTPUT_FILE_NAME=$(printf "$OUT_DIR/report_week%d.md" $REPORT_WEEK)
   resolve_template_file report_week_template.md $OUTPUT_FILE_NAME
 done

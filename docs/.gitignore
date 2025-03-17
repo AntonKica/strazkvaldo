@@ -1,2 +1,4 @@
 # makefile build file
 /build
+
+/.vscode
