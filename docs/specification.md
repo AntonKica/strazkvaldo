@@ -60,6 +60,7 @@ rectangle "Aplikácia: Strážca kvality domu" as app {
     usecase "prehľad všetkých aktivít" as ucActivityList
     usecase "prehľad vykonaných aktivít" as ucFinishedActivityList
     
+    usecase "zobraz notifikácie" as ucShowNotifications
     usecase "nastavenie upozornení" as ucNotificationSettings
 }
 
@@ -70,6 +71,7 @@ user --> ucRoomManagement
 user --> ucActivityList
 user --> ucUpcomingActivityList
 user --> ucFinishedActivityList
+user --> ucShowNotifications
 user --> ucNotificationSettings
 
 admin --> ucLogin
