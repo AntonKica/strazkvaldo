@@ -1,28 +1,41 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+mod enums;
+mod handlers;
+mod model;
+mod schema;
 
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
+use actix_web::{web, App, HttpServer, Responder};
+use sqlx::postgres::{PgPool, PgPoolOptions};
+use sqlx::{ConnectOptions, Connection};
 
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-async fn manual_hello() -> impl Responder {
-    HttpResponse::Ok().body("Hey there!")
+pub struct AppState {
+    db: PgPool,
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new().service(
-            web::scope("/svc")
-                .service(hello)
-                .service(echo)
-                .route("/hey", web::get().to(manual_hello)),
-        )
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = match PgPoolOptions::new()
+        .max_connections(10)
+        .connect(&database_url)
+        .await
+    {
+        Ok(pool) => {
+            println!("✅Connection to the database is successful!");
+            pool
+        }
+        Err(err) => {
+            println!("🔥 Failed to connect to the database: {:?}", err);
+            std::process::exit(1);
+        }
+    };
+
+    HttpServer::new(move || {
+        App::new()
+            .app_data(web::Data::new(AppState { db: pool.clone() }))
+            .configure(handlers::config)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
