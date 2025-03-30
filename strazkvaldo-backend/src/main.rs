@@ -1,5 +1,6 @@
 mod enums;
 mod handlers;
+mod handlers_ota;
 mod model;
 mod schema;
 
