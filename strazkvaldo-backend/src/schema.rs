@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use std::time::Duration;
 
 #[derive(Deserialize, Debug)]
 pub struct FilterOptions {

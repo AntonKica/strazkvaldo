@@ -5,9 +5,8 @@ mod handlers_ra;
 mod model;
 mod schema;
 
-use actix_web::{web, App, HttpServer, Responder};
+use actix_web::{web, App, HttpServer};
 use sqlx::postgres::{PgPool, PgPoolOptions};
-use sqlx::{ConnectOptions, Connection};
 
 pub struct AppState {
     db: PgPool,

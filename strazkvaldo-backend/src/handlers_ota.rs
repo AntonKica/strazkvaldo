@@ -3,9 +3,7 @@ use crate::schema::{CreateOneTimeActivity, FilterOptions, UpdateOneTimeActivity}
 use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;
-use actix_web::web::service;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
-use chrono::{DateTime, Utc};
 
 fn filter_db_record(
     one_time_activity_model: &OneTimeActivityModel,
@@ -36,11 +34,15 @@ pub async fn get_one_time_activity_list(
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    let one_time_activities: Vec<OneTimeActivityModel> =
-        sqlx::query_as!(OneTimeActivityModel, r#"SELECT * FROM one_time_activity"#)
-            .fetch_all(&data.db)
-            .await
-            .unwrap();
+    let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
+        OneTimeActivityModel,
+        r#"SELECT * FROM one_time_activity LIMIT $1 OFFSET $2"#,
+        limit as i64,
+        offset as i64
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap();
 
     let one_time_activities_response = one_time_activities
         .into_iter()
@@ -81,13 +83,7 @@ pub async fn get_one_time_activity(
 }
 
 #[post("/one-time-activity")]
-pub async fn post_one_time_activity_list(
-    data: web::Data<AppState>,
-    opts: web::Query<FilterOptions>,
-) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
-    let offset = (opts.page.unwrap_or(1) - 1) * limit;
-
+pub async fn post_one_time_activity_list(data: web::Data<AppState>) -> impl Responder {
     let one_time_activities: Vec<OneTimeActivityModel> =
         sqlx::query_as!(OneTimeActivityModel, r#"SELECT * FROM one_time_activity"#)
             .fetch_all(&data.db)

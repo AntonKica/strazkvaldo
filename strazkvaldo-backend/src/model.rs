@@ -1,4 +1,3 @@
-use crate::enums::{ActivityType, CriticalityType};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 

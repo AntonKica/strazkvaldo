@@ -3,9 +3,7 @@ use crate::schema::{CreateRepeatedActivity, FilterOptions, UpdateRepeatedActivit
 use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;
-use actix_web::web::service;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
-use chrono::{DateTime, Utc};
 
 fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
@@ -42,11 +40,15 @@ pub async fn get_repeated_activity_list(
     let limit = opts.limit.unwrap_or(10);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    let repeated_activities: Vec<RepeatedActivityModel> =
-        sqlx::query_as!(RepeatedActivityModel, r#"SELECT * FROM repeated_activity"#)
-            .fetch_all(&data.db)
-            .await
-            .unwrap();
+    let repeated_activities: Vec<RepeatedActivityModel> = sqlx::query_as!(
+        RepeatedActivityModel,
+        r#"SELECT * FROM repeated_activity LIMIT $1 OFFSET $2"#,
+        limit as i64,
+        offset as i64
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap();
 
     let repeated_activities_response = repeated_activities
         .into_iter()
@@ -87,13 +89,7 @@ pub async fn get_repeated_activity(
 }
 
 #[post("/repeated-activity")]
-pub async fn post_repeated_activity_list(
-    data: web::Data<AppState>,
-    opts: web::Query<FilterOptions>,
-) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
-    let offset = (opts.page.unwrap_or(1) - 1) * limit;
-
+pub async fn post_repeated_activity_list(data: web::Data<AppState>) -> impl Responder {
     let repeated_activities: Vec<RepeatedActivityModel> =
         sqlx::query_as!(RepeatedActivityModel, r#"SELECT * FROM repeated_activity"#)
             .fetch_all(&data.db)
