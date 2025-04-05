@@ -1,31 +1,32 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-
+    import { base } from '$app/paths';
 	let { data }: PageProps = $props();
     console.log(data);
 </script>
 
 <h1>Používatelia</h1>
+
+<a href="{base}/admin/user/create">Vytvor nového používateľa &#x2795</a>
+
 <table>
     <thead>
         <tr>
             <td>kód použivateĺa</td>
             <td>používateľské meno</td>
-            <td>meno</td>
-            <td>priezvisko</td>
             <td>rola</td>
+            <td>vytvorený</td>
             <td></td>
         </tr>
     </thead>
     <tbody>
-{#each data.users as user}
+{#each data.app_users as app_user}
 		<tr>
-            <td>{user.code}</td>
-            <td>{user.username}</td>
-            <td>{user.firstName}</td>
-            <td>{user.lastName}</td>
-            <td>{user.role}</td>
-            <td><a href="#">pozri</a></td>
+            <td>{app_user.code}</td>
+            <td>{app_user.username}</td>
+            <td>{app_user.app_user_role}</td>
+            <td>{app_user.created}</td>
+            <td><a href="{base}/admin/user/{app_user.code}/view">pozri</a></td>
         </tr>
 {/each}
     </tbody>
