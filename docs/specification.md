@@ -1,11 +1,11 @@
 ---
-title: "Špecifikácia: Strážca kvality domu, verzia 1.1"
+title: "Špecifikácia: Strážca kvality domu, verzia 1.2"
 author: [Anton Kica]
 date: "14.3.2025"
 keywords: [špecifikácia]
 ...
 
-# Špecifikácia: Strážca kvality domu, verzia 1.1
+# Špecifikácia: Strážca kvality domu, verzia 1.2
 
 ## História zmien
 
@@ -13,6 +13,7 @@ keywords: [špecifikácia]
 | ------ | ----- | ----- | ----- |
 | 1.0 | 9.3.2025 | vytvorená hrubá verzia špecifikácie | Anton Kica |
 | 1.1 | 14.3.2025 | zapracovanie pripomienok; pridanie histórie obsahu a výkladu milníkov; úprava rolí, UC-diagramu, ER-diagramu, zmena HTMX na Svelte, časového harmonogramu | Anton Kica |
+| 1.2 | 6.4.2025 | úprava hostingu zmena SQL DMBS na PostgreSQL | Anton Kica |
 
 ## O aplikácií
 
@@ -198,9 +199,9 @@ Architektúra aplikácie bude realizovaná _client-server_ architektúrou ako SP
 
 - __klient__: HTML5, CSS3, Bootstrap 5.3, JavaScript ES8, Svelte 5.23
 - __server__: Rust 1.85, Actix 4
-- __databáza__: MySQL 8.3
+- __databáza__: PostgreSQL 17
 - __rozhranie client-server__: RestAPI
-- __hosting__: <http://chodiacidotaznik.xyz>
+- __hosting__: <strazkvaldo.chodiacidotaznik.xyz>
 - __podporované prehliadače__: Google Chrome 134, Firefox 136
 
 ## Časový harmonogram
