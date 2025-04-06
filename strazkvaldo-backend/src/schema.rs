@@ -51,3 +51,21 @@ pub struct UpdateRepeatedActivity {
     pub start_date: DateTime<Utc>,
     pub end_date: DateTime<Utc>,
 }
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CreateAppUser {
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub username: String,
+    pub password: String,
+    pub app_user_role: i32,
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UpdateAppUser {
+    pub first_name: String,
+    pub last_name: String,
+    pub email: String,
+    pub username: String,
+    pub password: Option<String>,
+    pub app_user_role: i32,
+}

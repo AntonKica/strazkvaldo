@@ -2382,9 +2382,11 @@ dependencies = [
  "chrono",
  "env_logger",
  "futures",
+ "hex",
  "num_enum",
  "serde",
  "serde_json",
+ "sha2",
  "sqlx",
  "uuid",
 ]

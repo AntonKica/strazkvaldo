@@ -35,3 +35,19 @@ impl fmt::Display for CriticalityType {
         write!(f, "{:?}", self)
     }
 }
+#[repr(u8)]
+#[derive(Debug, Clone, Serialize, Deserialize, TryFromPrimitive)]
+pub enum AppUserRole {
+    Administrator = 0,
+    User = 1,
+}
+impl From<i32> for AppUserRole {
+    fn from(item: i32) -> Self {
+        AppUserRole::try_from(item as u8).expect("Unknown user role")
+    }
+}
+impl fmt::Display for AppUserRole {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
