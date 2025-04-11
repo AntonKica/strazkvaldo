@@ -7,6 +7,7 @@ use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use chrono::Utc;
+use sha2::{Digest, Sha512};
 
 pub fn filter_db_record(app_user_model: &AppUserModel) -> AppUserModelResponse {
     AppUserModelResponse {
@@ -150,6 +151,19 @@ pub async fn patch_app_user(
 
     let app_user = query_result.unwrap();
 
+    //let mut hasher = Sha512::new();
+    //hasher.update(password);
+    //let password_hash = ;
+    let password_hash = match body.password.to_owned() {
+        Some(password) => {
+            let mut hasher = Sha512::new();
+            hasher.update(password);
+
+            hex::encode(hasher.finalize().to_vec())
+        }
+        None => app_user.password_hash.to_owned(),
+    };
+
     //let now = Utc::now();
     //let note = query_result.unwrap();
 
@@ -161,7 +175,7 @@ pub async fn patch_app_user(
         body.last_name.to_owned(),
         body.email.to_owned(),
         body.username.to_owned(),
-        body.password.clone().unwrap_or(app_user.password_hash.to_owned()),
+        password_hash,
         body.app_user_role.to_owned(),
         Utc::now(),
     ) .fetch_one(&data.db)
