@@ -11,6 +11,11 @@
 
         const formData = new FormData(event.target as HTMLFormElement);
         const formEntries = Object.fromEntries(formData);
+		
+		if (!formEntries.password?.trim()) {
+			delete formEntries.password;
+		}
+
         const formatted_data = {
 		...formEntries,
 		app_user_role: Number(formEntries.app_user_role)
