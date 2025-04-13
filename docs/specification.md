@@ -13,7 +13,7 @@ keywords: [špecifikácia]
 | ------ | ----- | ----- | ----- |
 | 1.0 | 9.3.2025 | vytvorená hrubá verzia špecifikácie | Anton Kica |
 | 1.1 | 14.3.2025 | zapracovanie pripomienok; pridanie histórie obsahu a výkladu milníkov; úprava rolí, UC-diagramu, ER-diagramu, zmena HTMX na Svelte, časového harmonogramu | Anton Kica |
-| 1.2 | 6.4.2025 | úprava hostingu zmena SQL DMBS na PostgreSQL | Anton Kica |
+| 1.2 | 6.4.2025 | úprava hostingu, zmena SQL DMBS na PostgreSQL | Anton Kica |
 
 ## O aplikácií
 
