@@ -40,10 +40,20 @@ INSERT INTO app_user(code,
 VALUES ('USR-0000',
         'Admin',
         'Admin',
-        'admin@admin.com',
+        'admin@strazkvaldo.com',
         'admin',
         encode(digest('admin123', 'sha512'), 'hex'),
         0, -- AppUserRole.Admin
+        NOW(),
+        NOW()
+       ),
+       ('USR-0001',
+        'Janko',
+        'Hrasko',
+        'jankohrasko@strazkvaldo.com',
+        'jankohrasko',
+        encode(digest('jankohrasko', 'sha512'), 'hex'),
+        1, -- AppUserRole.User
         NOW(),
         NOW()
        )
