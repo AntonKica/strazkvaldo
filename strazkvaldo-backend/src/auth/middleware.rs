@@ -16,17 +16,7 @@ pub async fn auth_middleware(
             .map(ServiceResponse::map_into_left_body);
     }
 
-    match req.cookie("id") {
-        Some(cookie) => {
-            println!("--------- The cookie is {:?}", cookie.value().to_string());
-        }
-        None => {
-            println!("--------- The cookie is empty");
-        }
-    };
-
     let session = req.get_session();
-
     if !is_authenticated(&session) {
         let (request, _pl) = req.into_parts();
 
