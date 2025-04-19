@@ -1,34 +1,9 @@
-use crate::handlers_user::filter_db_record;
 use crate::model::AppUserModel;
 use crate::AppState;
-use actix_session::Session;
 use actix_web::web;
-use actix_web::{get, HttpResponse, Responder};
-use futures::TryFutureExt;
+use actix_web::HttpResponse;
 use sha2::{Digest, Sha512};
 
-#[get("/user-info")]
-async fn get_user_info(session: Session, data: web::Data<AppState>) -> impl Responder {
-    let code = session.get::<String>("code").unwrap().unwrap();
-
-    match sqlx::query_as!(
-        AppUserModel,
-        "SELECT * FROM app_user WHERE code = $1",
-        code.clone()
-    )
-    .fetch_one(&data.db)
-    .await
-    {
-        Ok(user) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "user": filter_db_record(&user), })});
-            HttpResponse::Ok().json(response)
-        }
-        Err(_) => {
-            let message = format!("User with ID: {} not found", code);
-            HttpResponse::Ok().json(serde_json::json!({"status": "failure","message": message}))
-        }
-    }
-}
 #[derive(serde::Deserialize, Debug, serde::Serialize)]
 pub struct LoginUser {
     username: String,
@@ -86,17 +61,12 @@ async fn log_out(session: actix_session::Session) -> actix_web::HttpResponse {
             session.purge();
             HttpResponse::Ok().json(serde_json::json!({ "message": "You have successfully logged out"}))
         }
-        Err(e) => {
+        Err(_) => {
             HttpResponse::BadRequest()  .json(serde_json::json!({ "message": "We currently have some issues. Kindly try again and ensure you are logged in"}))
         }
     }
 }
 
 pub fn config(conf: &mut web::ServiceConfig) {
-    conf.service(
-        web::scope("/auth")
-            .service(login_user)
-            .service(log_out)
-            .service(get_user_info),
-    );
+    conf.service(web::scope("/auth").service(login_user).service(log_out));
 }

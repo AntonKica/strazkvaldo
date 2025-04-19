@@ -1,9 +1,6 @@
 mod auth;
 mod enums;
 mod handlers;
-mod handlers_ota;
-mod handlers_ra;
-mod handlers_user;
 mod model;
 mod schema;
 

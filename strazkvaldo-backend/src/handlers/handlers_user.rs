@@ -1,7 +1,5 @@
-use crate::model::{AppUserModel, AppUserModelResponse, RepeatedActivityModelResponse};
-use crate::schema::{
-    CreateAppUser, CreateRepeatedActivity, FilterOptions, UpdateAppUser, UpdateRepeatedActivity,
-};
+use crate::model::{AppUserModel, AppUserModelResponse};
+use crate::schema::{CreateAppUser, FilterOptions, UpdateAppUser};
 use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;

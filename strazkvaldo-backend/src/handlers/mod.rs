@@ -1,7 +1,10 @@
+use crate::auth;
 use crate::enums::AppUserRole;
-use crate::{auth, handlers_ota, handlers_ra, handlers_user};
 use actix_web::middleware::from_fn;
 use actix_web::web;
+mod handlers_ota;
+mod handlers_ra;
+mod handlers_user;
 
 pub fn config(conf: &mut web::ServiceConfig) {
     let scope = web::scope("")
