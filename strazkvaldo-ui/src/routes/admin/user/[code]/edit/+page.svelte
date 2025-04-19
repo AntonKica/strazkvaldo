@@ -3,6 +3,7 @@
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
 	import {app_user_role_to_string} from '$lib/common';
+    import { SVC_ADMIN_APP_USER } from '$lib/serviceRoutes';
 
 	let { data }: PageProps = $props();
 	
@@ -21,7 +22,7 @@
 		app_user_role: Number(formEntries.app_user_role)
         };
         
-		const res = await fetch(`/svc/app-user/${data.user.code}`, {
+		const res = await fetch(SVC_ADMIN_APP_USER.PATCH(data.user.code), {
 			method: "PATCH",
             headers: {
                 'Content-Type': 'application/json' 

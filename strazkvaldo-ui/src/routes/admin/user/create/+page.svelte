@@ -2,6 +2,7 @@
 	import type { PageProps } from './$types';
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
+    import { SVC_ADMIN_APP_USER } from '$lib/serviceRoutes';
     
 	let { data }: PageProps = $props();
     console.log(data);
@@ -16,7 +17,7 @@
 		app_user_role: Number(data.app_user_role)
         };
         
-		fetch('/svc/app-user', {
+		fetch(SVC_ADMIN_APP_USER.POST(), {
 			method: "POST",
             headers: {
                 'Content-Type': 'application/json' 
