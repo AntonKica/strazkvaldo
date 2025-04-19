@@ -15,6 +15,14 @@ export function app_user_role_to_string(app_user_role: AppUserRole): string {
 }
 
 export enum AppUserRole {
+    Unsigned=-1,
     Administrator=0,
     User=1,
+}
+export function app_user_role_from_int(appUserRoleNumber: Number): AppUserRole {
+    switch(appUserRoleNumber) {
+        case 0: return AppUserRole.Administrator;
+        case 1: return AppUserRole.User;
+        default: return AppUserRole.Unsigned;
+    };
 }

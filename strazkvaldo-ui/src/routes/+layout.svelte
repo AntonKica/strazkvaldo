@@ -1,5 +1,9 @@
 <script>
     import { base } from '$app/paths';
+    import { goto } from '$app/navigation';
+    import { AppUserRole } from '$lib/common';
+	import { auth } from '$lib/userState.svelte';
+
 	let { children } = $props();
 </script>
 
@@ -11,29 +15,15 @@
 
 
 <ul id="menu">
-<!--
- usecase "prihlásiť/odhlásiť sa" as ucLogin
-    usecase "zaregistrovať sa" as ucSignin
-
-    usecase "správa používateľov" as ucUserManagement
-    usecase "správa číselníkov" as ucEnumManagement
-
-    usecase "správa miestností" as ucRoomManagement
-    usecase "správa aktivít" as ucActivityManagement
-    usecase "prehľad najbližších aktivít" as ucUpcomingActivityList
-    usecase "vyhodnoť nedávne aktivíty" as ucUpcomingActivityList
-    usecase "prehľad všetkých aktivít" as ucActivityList
-    usecase "prehľad vykonaných aktivít" as ucFinishedActivityList
-    
-    usecase "nastavenie upozornení" as ucNotificationSettings
-	-->
 	<li><a href="{base}/">Domov</a></li> |
 	<li><a href="{base}/about">O aplikácií</a></li> |
-	|
+	{#if auth.userState.role == AppUserRole.Administrator}
 	<li style="color:indianred">Admin</li> |
 	<li><a style="color:indianred" href="{base}/admin/user">Správa používateľov</a></li> |
 	<li><a style="color:indianred" href="{base}/admin/enum">Správa číselníkov</a></li> |
 	|
+	{/if}
+	{#if auth.userState.role == AppUserRole.User}
 	<li style="color:#117a65">Užívateľ</li> |
 	<li><a style="color:#117a65" href="{base}/user/rooms">Správa miestnosti</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/activity">Správa aktivít</a></li> |
@@ -41,6 +31,13 @@
 	<li><a style="color:#117a65" href="{base}/user/recent-activities">Nedávne aktivity</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/notifications">Notifikácie</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/settings">Nastavenia</a></li> |
+	{/if}
+	
+	{#if auth.userState.role == AppUserRole.Unsigned}
+		<li><a style="color:#000000" href="{base}/login">Prihlásiť sa</a></li>
+	{:else}
+		<li><a type="button" style="color:#000000" onclick={() => { auth.logout(); goto(base) }}>Odhlásiť sa</a></li>
+	{/if}
 </ul>
 
 {@render children()}
