@@ -4,6 +4,7 @@ use actix_web::middleware::from_fn;
 use actix_web::web;
 mod handlers_ota;
 mod handlers_ra;
+mod handlers_room;
 mod handlers_user;
 
 pub fn config(conf: &mut web::ServiceConfig) {
@@ -31,7 +32,11 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_ra::get_repeated_activity_list)
                 .service(handlers_ra::get_repeated_activity)
                 .service(handlers_ra::post_repeated_activity)
-                .service(handlers_ra::patch_repeated_activity),
+                .service(handlers_ra::patch_repeated_activity)
+                .service(handlers_room::get_room_list)
+                .service(handlers_room::get_room)
+                .service(handlers_room::post_room_list)
+                .service(handlers_room::patch_room),
         );
 
     conf.service(scope);

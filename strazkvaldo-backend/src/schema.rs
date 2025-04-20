@@ -69,3 +69,15 @@ pub struct UpdateAppUser {
     pub password: Option<String>,
     pub app_user_role: i32,
 }
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CreateRoom {
+    pub name: String,
+    pub room_type: i32,
+    pub description: String,
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UpdateRoom {
+    pub name: String,
+    pub room_type: i32,
+    pub description: String,
+}

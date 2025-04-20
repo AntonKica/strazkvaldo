@@ -123,3 +123,19 @@ VALUES ('RA-0001',
        )
 ;
 
+INSERT INTO room("code",
+                 "name",
+                 "room_type",
+                 "description"
+)
+VALUES ('ROOM-0001',
+        'Bathroom',
+        0,
+        'Just a one bathroom alright'
+       ),
+       ('ROOM-0002',
+        'Bedroom',
+        1,
+        'Just mine bedroom'
+       )
+;

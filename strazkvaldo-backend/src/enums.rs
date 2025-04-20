@@ -5,8 +5,13 @@ use std::fmt;
 #[repr(u8)]
 #[derive(Debug, Clone, Serialize, Deserialize, TryFromPrimitive)]
 pub enum ActivityType {
-    Cleaning = 0,
-    Washing = 1,
+    Washing,
+    Mopping,
+    Cleaning,
+    Vacuuming,
+    Dusting,
+    GarbageDisposal,
+    Other,
 }
 impl From<i32> for ActivityType {
     fn from(item: i32) -> Self {
@@ -47,6 +52,29 @@ impl From<i32> for AppUserRole {
     }
 }
 impl fmt::Display for AppUserRole {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+#[repr(u8)]
+#[derive(Debug, Clone, Serialize, Deserialize, TryFromPrimitive)]
+pub enum RoomType {
+    Bathroom,
+    Bedroom,
+    LivingRoom,
+    Kitchen,
+    Balcony,
+    WorkRoom,
+    Garage,
+    Cellar,
+    Other,
+}
+impl From<i32> for RoomType {
+    fn from(item: i32) -> Self {
+        RoomType::try_from(item as u8).expect("Unknown room role")
+    }
+}
+impl fmt::Display for RoomType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{:?}", self)
     }

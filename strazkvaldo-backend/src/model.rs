@@ -1,4 +1,4 @@
-use crate::enums::AppUserRole;
+use crate::enums::{AppUserRole, RoomType};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -70,4 +70,20 @@ pub struct RepeatedActivityModelResponse {
     pub periodicity: String,
     pub start_date: String,
     pub end_date: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RoomModel {
+    pub code: String,
+    pub name: String,
+    pub room_type: RoomType,
+    pub description: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RoomModelResponse {
+    pub code: String,
+    pub name: String,
+    pub room_type: String,
+    pub description: String,
 }
