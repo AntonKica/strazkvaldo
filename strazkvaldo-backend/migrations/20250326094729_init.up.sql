@@ -27,6 +27,12 @@ CREATE TABLE IF NOT EXISTS app_user("code" CHAR(8) PRIMARY KEY NOT NULL,
     "updated" TIMESTAMPTZ NOT NULL
     );
 
+CREATE TABLE IF NOT EXISTS room("code" CHAR(9) PRIMARY KEY NOT NULL,
+    "name" VARCHAR(80) NOT NULL,
+    "room_type" INT NOT NULL,
+    "description" TEXT NOT NULL
+    );
+
 INSERT INTO app_user(code,
                      first_name,
                      last_name,
@@ -57,3 +63,63 @@ VALUES ('USR-0000',
         NOW(),
         NOW()
        )
+;
+
+INSERT INTO one_time_activity("code",
+                              "name",
+                              "activity_type",
+                              "criticality_type",
+                              "duration_in_seconds",
+                              "description",
+                              "date"
+)
+VALUES ('OTA-0001',
+        'Dirty clothes',
+        0,
+        0,
+        1800,
+        'Got some dirty clothes',
+        NOW()
+       ),
+       ('OTA-0002',
+        'Dirty floor',
+        0,
+        0,
+        1800,
+        'There is some dirty kitchen',
+        NOW()
+       )
+;
+
+INSERT INTO repeated_activity("code",
+                              "name",
+                              "activity_type",
+                              "criticality_type",
+                              "duration_in_seconds",
+                              "description",
+                              "periodicity",
+                              "start_date",
+                              "end_date"
+)
+VALUES ('RA-0001',
+        'Washing',
+        0,
+        0,
+        3600,
+        'Periodical washing of clothes',
+        'MONTH',
+        NOW(),
+        NOW()
+       ),
+       ('RA-0002',
+        'Dirty floor mopping',
+        0,
+        0,
+        1800,
+        'Periodical floor mopping',
+        'MONTH',
+        NOW(),
+        NOW()
+       )
+;
+
