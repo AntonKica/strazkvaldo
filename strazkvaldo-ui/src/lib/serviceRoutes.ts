@@ -29,3 +29,4 @@ class EntityRoute {
 
 export const SVC_ADMIN_APP_USER = new EntityRoute('admin', 'app-user');
 export const SVC_USER_ONE_TIME_ACTIVITY = new EntityRoute('user', 'one-time-activity');
+export const SVC_USER_ROOM = new EntityRoute('user', 'room');

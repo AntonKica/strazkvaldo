@@ -25,8 +25,9 @@
 	{/if}
 	{#if auth.userState.role == AppUserRole.User}
 	<li style="color:#117a65">Užívateľ</li> |
-	<li><a style="color:#117a65" href="{base}/user/rooms">Správa miestnosti</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/activity">Správa aktivít</a></li> |
+	<li><a style="color:#117a65" href="{base}/user/room">Správa miestnosti</a></li> |
+	<li><a style="color:#117a65" href="{base}/user/one-time-activity">Správa jednorázových aktivít</a></li> |
+	<li><a style="color:#117a65" href="{base}/user/repeated-activity">Správa opakovaných aktivít</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/upcoming-activities">Najbližšie aktivity</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/recent-activities">Nedávne aktivity</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/notifications">Notifikácie</a></li> |
