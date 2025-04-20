@@ -1,7 +1,7 @@
 use crate::auth;
-use crate::enums::AppUserRole;
 use actix_web::middleware::from_fn;
 use actix_web::web;
+mod handlers_enum;
 mod handlers_ota;
 mod handlers_ra;
 mod handlers_room;
@@ -12,8 +12,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(
             web::scope("/admin")
                 .wrap(from_fn(|req, srv| async move {
-                    auth::middleware::check_role_middleware(req, srv, AppUserRole::Administrator)
-                        .await
+                    auth::middleware::check_role_middleware(req, srv, "admin".into()).await
                 }))
                 .service(handlers_user::get_app_user)
                 .service(handlers_user::get_app_user_list)
@@ -23,7 +22,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(
             web::scope("/user")
                 .wrap(from_fn(|req, srv| async move {
-                    auth::middleware::check_role_middleware(req, srv, AppUserRole::User).await
+                    auth::middleware::check_role_middleware(req, srv, "user".into()).await
                 }))
                 .service(handlers_ota::get_one_time_activity_list)
                 .service(handlers_ota::get_one_time_activity)
@@ -35,9 +34,10 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_ra::patch_repeated_activity)
                 .service(handlers_room::get_room_list)
                 .service(handlers_room::get_room)
-                .service(handlers_room::post_room_list)
+                .service(handlers_room::post_room)
                 .service(handlers_room::patch_room),
-        );
+        )
+        .service(handlers_enum::get_enum);
 
     conf.service(scope);
 }

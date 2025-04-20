@@ -19,7 +19,7 @@
 {#each data.rooms as room}
 		<tr>
             <td>{room.name}</td>
-            <td>{room.room_type}</td>
+            <td>{room.room_type.text}</td>
             <td><a href="{base}/user/room/{room.code}/view">pozri</a></td>
         </tr>
 {/each}

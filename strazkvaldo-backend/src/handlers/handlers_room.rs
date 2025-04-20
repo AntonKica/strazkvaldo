@@ -1,3 +1,4 @@
+use crate::handlers::handlers_enum::{get_enum_for, EnumType};
 use crate::model::{RoomModel, RoomModelResponse};
 use crate::schema::{CreateRoom, FilterOptions, UpdateRoom};
 use crate::AppState;
@@ -5,11 +6,11 @@ use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 
-fn filter_db_record(room_model: &RoomModel) -> RoomModelResponse {
+fn filter_db_record(room_model: &RoomModel, data: &web::Data<AppState>) -> RoomModelResponse {
     RoomModelResponse {
         code: room_model.code.to_owned(),
         name: room_model.name.to_owned(),
-        room_type: room_model.room_type.to_string().to_owned(),
+        room_type: get_enum_for(EnumType::RoomType, room_model.room_type.to_owned(), data).unwrap(),
         description: room_model.description.to_owned(),
     }
 }
@@ -34,7 +35,7 @@ pub async fn get_room_list(
 
     let room_response = one_time_activities
         .into_iter()
-        .map(|note| filter_db_record(&note))
+        .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<RoomModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -52,7 +53,7 @@ pub async fn get_room(path: web::Path<String>, data: web::Data<AppState>) -> imp
         .await
     {
         Ok(room) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "room": room, })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "room":  filter_db_record(&room, &data), })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {
@@ -61,26 +62,6 @@ pub async fn get_room(path: web::Path<String>, data: web::Data<AppState>) -> imp
                 .json(serde_json::json!({"status": "failure","message": message}));
         }
     }
-}
-
-#[post("/room")]
-pub async fn post_room_list(data: web::Data<AppState>) -> impl Responder {
-    let one_time_activities: Vec<RoomModel> = sqlx::query_as!(RoomModel, r#"SELECT * FROM room"#)
-        .fetch_all(&data.db)
-        .await
-        .unwrap();
-
-    let one_time_activities_response = one_time_activities
-        .into_iter()
-        .map(|note| filter_db_record(&note))
-        .collect::<Vec<RoomModelResponse>>();
-
-    let json_response = serde_json::json!({
-        "status": "success",
-        "results":one_time_activities_response.len(),
-        "one_time_activities":one_time_activities_response
-    });
-    HttpResponse::Ok().json(json_response)
 }
 
 #[post("/room")]

@@ -12,19 +12,12 @@
         const formData = new FormData(event.target as HTMLFormElement);
         const formEntries = Object.fromEntries(formData);
 		
-		console.log(formEntries);
-		
-        const formatted_data = {
-		...formEntries,
-		room_type: Number(formEntries.room_type)
-        };
-        
 		const res = await fetch(SVC_USER_ROOM.PATCH(data.room.code), {
 			method: "PATCH",
             headers: {
                 'Content-Type': 'application/json' 
             },
-			body:JSON.stringify(formatted_data)
+			body:JSON.stringify(formEntries)
 		});
 
 		if(!res.ok) {
@@ -47,9 +40,9 @@
 <form method="POST" onsubmit={handleSubmit}>
 	<label> meno <input name="name" type="text" value={data.room.name}> </label> <br>
     <label> typ miestnosti 
-        <select name="room_type" value={data.room.room_type.name}>
+        <select name="room_type" value={data.room.room_type.code}>
 			{#each data.room_types as room_type}
-				<option value={room_type.code}>{room_type.name}</option>
+				<option value={room_type.code}>{room_type.text}</option>
 			{/each}
         </select>
 	 </label> <br>

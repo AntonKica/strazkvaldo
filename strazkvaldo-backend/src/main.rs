@@ -1,9 +1,9 @@
 mod auth;
-mod enums;
 mod handlers;
 mod model;
 mod schema;
 
+use crate::model::EnumModel;
 use actix_web::middleware::from_fn;
 use actix_web::web::scope;
 use actix_web::{middleware, web, App, HttpServer};
@@ -12,6 +12,7 @@ use std::cmp::PartialEq;
 
 pub struct AppState {
     db: PgPool,
+    enum_values: Vec<EnumModel>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -60,11 +61,19 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let enum_values = sqlx::query_as!(EnumModel, r#"SELECT * FROM enum_values"#)
+        .fetch_all(&pool)
+        .await
+        .unwrap();
+
     let secret_key = actix_web::cookie::Key::generate();
 
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(AppState { db: pool.clone() }))
+            .app_data(web::Data::new(AppState {
+                db: pool.clone(),
+                enum_values: enum_values.clone(),
+            }))
             .wrap(from_fn(auth::middleware::auth_middleware))
             .wrap(match environment {
                 Environment::Development => actix_session::SessionMiddleware::builder(

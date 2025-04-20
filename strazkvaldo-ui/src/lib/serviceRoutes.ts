@@ -30,3 +30,8 @@ class EntityRoute {
 export const SVC_ADMIN_APP_USER = new EntityRoute('admin', 'app-user');
 export const SVC_USER_ONE_TIME_ACTIVITY = new EntityRoute('user', 'one-time-activity');
 export const SVC_USER_ROOM = new EntityRoute('user', 'room');
+
+export const SVC_ENUM_APP_USER_ROLE = new EntityRoute('enum', 'app-user-role');
+export const SVC_ENUM_CRITICALITY_TYPE = new EntityRoute('enum', 'criticality-type');
+export const SVC_ENUM_ROOM_TYPE = new EntityRoute('enum', 'room-type');
+export const SVC_ENUM_ACTIVITY_TYPE = new EntityRoute('enum', 'activity-type');

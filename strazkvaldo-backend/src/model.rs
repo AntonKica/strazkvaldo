@@ -1,4 +1,3 @@
-use crate::enums::{AppUserRole, RoomType};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 
@@ -10,7 +9,7 @@ pub struct AppUserModel {
     pub email: String,
     pub username: String,
     pub password_hash: String,
-    pub app_user_role: AppUserRole,
+    pub app_user_role: String,
     pub created: DateTime<Utc>,
     pub updated: DateTime<Utc>,
 }
@@ -21,7 +20,7 @@ pub struct AppUserModelResponse {
     pub last_name: String,
     pub email: String,
     pub username: String,
-    pub app_user_role: i32,
+    pub app_user_role: EnumModelResponse,
     pub created: String,
     pub updated: String,
 }
@@ -29,8 +28,8 @@ pub struct AppUserModelResponse {
 pub struct OneTimeActivityModel {
     pub code: String,
     pub name: String,
-    pub activity_type: i32,
-    pub criticality_type: i32,
+    pub activity_type: String,
+    pub criticality_type: String,
     pub duration_in_seconds: i32,
     pub description: String,
     pub date: DateTime<Utc>,
@@ -40,8 +39,8 @@ pub struct OneTimeActivityModel {
 pub struct OneTimeActivityModelResponse {
     pub code: String,
     pub name: String,
-    pub activity_type: String,
-    pub criticality_type: String,
+    pub activity_type: EnumModelResponse,
+    pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
     pub description: String,
     pub date: String,
@@ -50,8 +49,8 @@ pub struct OneTimeActivityModelResponse {
 pub struct RepeatedActivityModel {
     pub code: String,
     pub name: String,
-    pub activity_type: i32,
-    pub criticality_type: i32,
+    pub activity_type: String,
+    pub criticality_type: String,
     pub duration_in_seconds: i32,
     pub description: String,
     pub periodicity: String,
@@ -63,8 +62,8 @@ pub struct RepeatedActivityModel {
 pub struct RepeatedActivityModelResponse {
     pub code: String,
     pub name: String,
-    pub activity_type: String,
-    pub criticality_type: String,
+    pub activity_type: EnumModelResponse,
+    pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
     pub description: String,
     pub periodicity: String,
@@ -76,7 +75,7 @@ pub struct RepeatedActivityModelResponse {
 pub struct RoomModel {
     pub code: String,
     pub name: String,
-    pub room_type: RoomType,
+    pub room_type: String,
     pub description: String,
 }
 
@@ -84,6 +83,17 @@ pub struct RoomModel {
 pub struct RoomModelResponse {
     pub code: String,
     pub name: String,
-    pub room_type: String,
+    pub room_type: EnumModelResponse,
     pub description: String,
+}
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct EnumModel {
+    pub name: String,
+    pub code: String,
+    pub text: String,
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EnumModelResponse {
+    pub code: String,
+    pub text: String,
 }

@@ -1,3 +1,4 @@
+use crate::handlers::handlers_enum::{get_enum_for, EnumType};
 use crate::model::{AppUserModel, AppUserModelResponse};
 use crate::schema::{CreateAppUser, FilterOptions, UpdateAppUser};
 use crate::AppState;
@@ -7,14 +8,22 @@ use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use chrono::Utc;
 use sha2::{Digest, Sha512};
 
-pub fn filter_db_record(app_user_model: &AppUserModel) -> AppUserModelResponse {
+pub fn filter_db_record(
+    app_user_model: &AppUserModel,
+    data: &web::Data<AppState>,
+) -> AppUserModelResponse {
     AppUserModelResponse {
         code: app_user_model.code.to_owned(),
         first_name: app_user_model.first_name.to_owned(),
         last_name: app_user_model.last_name.to_owned(),
         email: app_user_model.email.to_owned(),
         username: app_user_model.username.to_owned(),
-        app_user_role: app_user_model.app_user_role.to_owned() as i32,
+        app_user_role: get_enum_for(
+            EnumType::AppUserRole.into(),
+            app_user_model.app_user_role.to_owned(),
+            data,
+        )
+        .unwrap(),
         created: app_user_model
             .created
             .format("%d.%m.%Y %H:%M:%S")
@@ -48,7 +57,7 @@ pub async fn get_app_user_list(
 
     let app_users_response = app_user_models
         .into_iter()
-        .map(|note| filter_db_record(&note))
+        .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<AppUserModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -66,7 +75,7 @@ pub async fn get_app_user(path: web::Path<String>, data: web::Data<AppState>) ->
         .await
     {
         Ok(user) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "user": filter_db_record(&user), })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "user": filter_db_record(&user, &data), })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {
@@ -182,7 +191,7 @@ pub async fn patch_app_user(
     match query_result {
         Ok(app_user) => {
             let response_body = serde_json::json!({"status": "success","data": serde_json::json!({
-                "user": filter_db_record(&app_user)
+                "user": filter_db_record(&app_user, &data)
             })});
 
             return HttpResponse::Ok().json(response_body);

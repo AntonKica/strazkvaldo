@@ -5,8 +5,9 @@
 	let { data }: PageProps = $props();
 </script>
 
-<h1>Aktivity</h1>
+<h1>Jednorázové aktivity</h1>
 
+<!--
 <h2>Opakované aktivity</h2>
 <table>
     <thead>
@@ -41,10 +42,9 @@
 {/each}
     </tbody>
 </table>
-
 <hr>
+-->
 
-<h2>Jednorázové aktivity</h2>
 <table>
     <thead>
         <tr>
@@ -63,8 +63,8 @@
 		<tr>
             <td>{one_time_activity.code}</td>
             <td>{one_time_activity.name}</td>
-            <td>{one_time_activity.activity_type}</td>
-            <td>{one_time_activity.criticality_type}</td>
+            <td>{one_time_activity.activity_type.text}</td>
+            <td>{one_time_activity.criticality_type.text}</td>
             <td>
                 {one_time_activity.duration_in_seconds > 60 ? (one_time_activity.duration_in_seconds / 60 >> 0) + " minút" : ""}
                 {one_time_activity.duration_in_seconds % 60 != 0 ? (one_time_activity.duration_in_seconds % 60 >> 0) + " sekúnd" : ""}

@@ -1,3 +1,4 @@
+use crate::handlers::handlers_enum::{get_enum_for, EnumType};
 use crate::model::{OneTimeActivityModel, OneTimeActivityModelResponse};
 use crate::schema::{CreateOneTimeActivity, FilterOptions, UpdateOneTimeActivity};
 use crate::AppState;
@@ -7,15 +8,23 @@ use actix_web::{get, patch, post, web, HttpResponse, Responder};
 
 fn filter_db_record(
     one_time_activity_model: &OneTimeActivityModel,
+    data: &web::Data<AppState>,
 ) -> OneTimeActivityModelResponse {
     OneTimeActivityModelResponse {
         code: one_time_activity_model.code.to_owned(),
         name: one_time_activity_model.name.to_owned(),
-        activity_type: one_time_activity_model.activity_type.to_string().to_owned(),
-        criticality_type: one_time_activity_model
-            .criticality_type
-            .to_string()
-            .to_owned(),
+        activity_type: get_enum_for(
+            EnumType::ActivityType,
+            one_time_activity_model.activity_type.to_owned(),
+            data,
+        )
+        .unwrap(),
+        criticality_type: get_enum_for(
+            EnumType::CriticalityType.into(),
+            one_time_activity_model.criticality_type.to_owned(),
+            data,
+        )
+        .unwrap(),
         duration_in_seconds: one_time_activity_model.duration_in_seconds.to_owned(),
         description: one_time_activity_model.description.to_owned(),
         date: one_time_activity_model
@@ -46,7 +55,7 @@ pub async fn get_one_time_activity_list(
 
     let one_time_activities_response = one_time_activities
         .into_iter()
-        .map(|note| filter_db_record(&note))
+        .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<OneTimeActivityModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -81,28 +90,6 @@ pub async fn get_one_time_activity(
         }
     }
 }
-
-#[post("/one-time-activity")]
-pub async fn post_one_time_activity_list(data: web::Data<AppState>) -> impl Responder {
-    let one_time_activities: Vec<OneTimeActivityModel> =
-        sqlx::query_as!(OneTimeActivityModel, r#"SELECT * FROM one_time_activity"#)
-            .fetch_all(&data.db)
-            .await
-            .unwrap();
-
-    let one_time_activities_response = one_time_activities
-        .into_iter()
-        .map(|note| filter_db_record(&note))
-        .collect::<Vec<OneTimeActivityModelResponse>>();
-
-    let json_response = serde_json::json!({
-        "status": "success",
-        "results":one_time_activities_response.len(),
-        "one_time_activities":one_time_activities_response
-    });
-    HttpResponse::Ok().json(json_response)
-}
-
 #[post("/one-time-activity")]
 pub async fn post_one_time_activity(
     body: web::Json<CreateOneTimeActivity>,

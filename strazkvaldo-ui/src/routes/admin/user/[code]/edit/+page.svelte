@@ -18,8 +18,7 @@
 		}
 
         const formatted_data = {
-		...formEntries,
-		app_user_role: Number(formEntries.app_user_role)
+		...formEntries
         };
         
 		const res = await fetch(SVC_ADMIN_APP_USER.PATCH(data.user.code), {
@@ -56,9 +55,9 @@
 	<label> používateľské meno <input name="username" type="text" value={data.user.username}> </label>
 	<label> heslo <input name="password" type="password"> </label> <br>
     <label> rola
-        <select name="app_user_role" value={data.user.app_user_role}>
-			{#each data.roles as role}
-				<option value={role}>{app_user_role_to_string(role)}</option>
+        <select name="app_user_role" value={data.user.app_user_role.code}>
+			{#each data.app_user_role as role}
+				<option value={role.code}>{role.text}</option>
 			{/each}
         </select>
 	 </label> <br><br>

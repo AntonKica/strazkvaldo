@@ -6,5 +6,5 @@
 
 <h1>Aktivita</h1>
 <b>Názov</b> {data.name} <br>
-<b>Typ</b> {data.activity_type} <br>
+<b>Typ</b> {data.activity_type.text} <br>
 <b>Popis</b> {data.description}

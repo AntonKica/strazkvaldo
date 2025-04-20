@@ -51,7 +51,7 @@ async fn login_user(
         .expect("Unable to renew password");
 
     HttpResponse::Ok().json(
-        serde_json::json!({"status": "success", "code": user.code.to_owned(), "role": user.app_user_role.to_owned() as i32}),
+        serde_json::json!({"status": "success", "code": user.code.to_owned(), "role": user.app_user_role.to_owned()}),
     )
 }
 #[actix_web::post("/logout")]

@@ -1,3 +1,4 @@
+use crate::handlers::handlers_enum::{get_enum_for, EnumType};
 use crate::model::{RepeatedActivityModel, RepeatedActivityModelResponse};
 use crate::schema::{CreateRepeatedActivity, FilterOptions, UpdateRepeatedActivity};
 use crate::AppState;
@@ -7,15 +8,23 @@ use actix_web::{get, patch, post, web, HttpResponse, Responder};
 
 fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
+    data: &web::Data<AppState>,
 ) -> RepeatedActivityModelResponse {
     RepeatedActivityModelResponse {
         code: repeated_activity_model.code.to_owned(),
         name: repeated_activity_model.name.to_owned(),
-        activity_type: repeated_activity_model.activity_type.to_string().to_owned(),
-        criticality_type: repeated_activity_model
-            .criticality_type
-            .to_string()
-            .to_owned(),
+        activity_type: get_enum_for(
+            EnumType::ActivityType,
+            repeated_activity_model.activity_type.to_owned(),
+            data,
+        )
+        .unwrap(),
+        criticality_type: get_enum_for(
+            EnumType::CriticalityType.into(),
+            repeated_activity_model.criticality_type.to_owned(),
+            data,
+        )
+        .unwrap(),
         duration_in_seconds: repeated_activity_model.duration_in_seconds.to_owned(),
         description: repeated_activity_model.description.to_owned(),
         periodicity: repeated_activity_model.periodicity.to_owned(),
@@ -52,7 +61,7 @@ pub async fn get_repeated_activity_list(
 
     let repeated_activities_response = repeated_activities
         .into_iter()
-        .map(|note| filter_db_record(&note))
+        .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<RepeatedActivityModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -86,27 +95,6 @@ pub async fn get_repeated_activity(
                 .json(serde_json::json!({"status": "failure","message": message}));
         }
     }
-}
-
-#[post("/repeated-activity")]
-pub async fn post_repeated_activity_list(data: web::Data<AppState>) -> impl Responder {
-    let repeated_activities: Vec<RepeatedActivityModel> =
-        sqlx::query_as!(RepeatedActivityModel, r#"SELECT * FROM repeated_activity"#)
-            .fetch_all(&data.db)
-            .await
-            .unwrap();
-
-    let repeated_activities_response = repeated_activities
-        .into_iter()
-        .map(|note| filter_db_record(&note))
-        .collect::<Vec<RepeatedActivityModelResponse>>();
-
-    let json_response = serde_json::json!({
-        "status": "success",
-        "results":repeated_activities_response.len(),
-        "repeated_activities":repeated_activities_response
-    });
-    HttpResponse::Ok().json(json_response)
 }
 
 #[post("/repeated-activity")]
