@@ -1,5 +1,6 @@
 <script lang="ts">
     import { base } from '$app/paths';
+    import { duration_in_seconds_to_string, datetime_rfc3339_to_string } from '$lib/common';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -7,6 +8,7 @@
 
 <h1>Jednorázové aktivity</h1>
 
+<a href="{base}/user/one-time-activity/create">Vytvor novú jednorázovú aktivitu &#x2795</a>
 <!--
 <h2>Opakované aktivity</h2>
 <table>
@@ -65,13 +67,10 @@
             <td>{one_time_activity.name}</td>
             <td>{one_time_activity.activity_type.text}</td>
             <td>{one_time_activity.criticality_type.text}</td>
-            <td>
-                {one_time_activity.duration_in_seconds > 60 ? (one_time_activity.duration_in_seconds / 60 >> 0) + " minút" : ""}
-                {one_time_activity.duration_in_seconds % 60 != 0 ? (one_time_activity.duration_in_seconds % 60 >> 0) + " sekúnd" : ""}
-             </td>
-            <td>{one_time_activity.date}</td>
+            <td>{duration_in_seconds_to_string(one_time_activity.duration_in_seconds)}</td>
+            <td>{datetime_rfc3339_to_string(one_time_activity.date)}</td>
             <td>{one_time_activity.description}</td>
-            <td><a href="{base}/user/one-time-activity/view/{one_time_activity.code}">pozri</a></td>
+            <td><a href="{base}/user/one-time-activity/{one_time_activity.code}/view/">pozri</a></td>
         </tr>
 {/each}
     </tbody>

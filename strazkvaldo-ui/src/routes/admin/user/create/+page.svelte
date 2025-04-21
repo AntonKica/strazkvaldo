@@ -14,7 +14,6 @@
         const data = Object.fromEntries(formData);
         const formatted_data = {
 		...data,
-		app_user_role: Number(data.app_user_role)
         };
         
 		fetch(SVC_ADMIN_APP_USER.POST(), {

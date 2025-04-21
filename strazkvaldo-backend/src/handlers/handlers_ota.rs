@@ -27,11 +27,7 @@ fn filter_db_record(
         .unwrap(),
         duration_in_seconds: one_time_activity_model.duration_in_seconds.to_owned(),
         description: one_time_activity_model.description.to_owned(),
-        date: one_time_activity_model
-            .date
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
+        date: one_time_activity_model.date.to_rfc3339(),
     }
 }
 
@@ -80,7 +76,7 @@ pub async fn get_one_time_activity(
     .await
     {
         Ok(one_time_activity) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "one_time_activity": one_time_activity, })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "one_time_activity": filter_db_record(&one_time_activity, &data), })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {

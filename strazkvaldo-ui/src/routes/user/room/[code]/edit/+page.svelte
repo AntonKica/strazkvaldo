@@ -46,7 +46,7 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label> popis <input name="description" type="text" value={data.room.description}> </label> <br><br>
+	<label> popis <textarea name="description">{data.room.description}</textarea></label> <br><br>
 	<button type="submit">Ulož zmeny</button>
 	<button type="button" onclick={goto_view}>Zahoď zmeny</button>
 </form>
