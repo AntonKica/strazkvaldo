@@ -3,6 +3,7 @@ mod auth;
 mod handlers;
 mod model;
 mod schema;
+mod tests;
 
 use crate::model::EnumModel;
 use actix_web::middleware::from_fn;

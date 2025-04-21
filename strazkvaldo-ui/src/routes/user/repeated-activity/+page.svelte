@@ -19,8 +19,7 @@
             <td>Kritickosť</td>
             <td>Trvanie</td>
             <td>Opakovanie</td>
-            <td>Od</td>
-            <td>Do</td>
+            <td>Kedy</td>
             <td></td>
         </tr>
     </thead>
@@ -32,8 +31,7 @@
             <td>{repeated_activity.criticality_type.text}</td>
             <td>{duration_in_seconds_to_string(repeated_activity.duration_in_seconds)}</td>
             <td>{repeated_activity.periodicity.text}</td>
-            <td>{datetime_rfc3339_to_string(repeated_activity.start_date)}</td>
-            <td>{datetime_rfc3339_to_string(repeated_activity.end_date)}</td>
+            <td>{repeated_activity.periodicity_unit}</td>
             <td><a href={UI_USER_REPEATED_ACTIVITY.VIEW(repeated_activity.code)}>pozri</a></td>
         </tr>
 {/each}

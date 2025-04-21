@@ -74,10 +74,10 @@ impl EnumModelResponseTrait for AppUserRole {
 #[repr(u8)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Periodicity {
-    Day,
-    Week,
-    Month,
-    Year,
+    Day,   // => no unit needed
+    Week,  // => day of week
+    Month, // => day of month
+    Year,  // => day of year
 }
 impl fmt::Display for Periodicity {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {

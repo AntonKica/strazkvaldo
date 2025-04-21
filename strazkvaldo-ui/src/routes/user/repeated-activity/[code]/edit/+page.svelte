@@ -21,9 +21,8 @@
 
         const formatted_data = {
 			...formEntries,
-			start_date: from_html_date(formEntries.start_date),
-			end_date: from_html_date(formEntries.end_date),
-			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours))
+			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours)),
+			periodicity_unit: Number(formEntries.periodicity_unit)
         };
 		
 		const res = await fetch(SVC_USER_REPEATED_ACTIVITY.PATCH(repeated_activity.code), {
@@ -46,7 +45,7 @@
 	}
 </script>
 
-<h1>jednorázová aktivita {repeated_activity.code}</h1>
+<h1>opakovaná aktivita {repeated_activity.code}</h1>
 
 <br>
 <form method="POST" onsubmit={handleSubmit}>
@@ -72,8 +71,9 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label>dátum <input type="date" name="start_date" value={to_html_date(repeated_activity.start_date)}></label> <br>
-	<label>dátum <input type="date" name="end_date" value={to_html_date(repeated_activity.end_date)}></label> <br>
+    <label> jednotka opakovania 
+        <input type="number" name="periodicity_unit"/>
+	 </label> <br>
 	<label>trvanie 
 		<input type="number" name="duration_hours" min="0" max="24" step="1" value={to_hours(repeated_activity.duration_in_seconds)}> hodín
 		<input type="number" name="duration_minutes" min="0" max="60" step="1" value={to_minutes(repeated_activity.duration_in_seconds)}> minút

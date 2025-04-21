@@ -54,8 +54,7 @@ pub struct RepeatedActivityModel {
     pub duration_in_seconds: i32,
     pub description: String,
     pub periodicity: String,
-    pub start_date: DateTime<Utc>,
-    pub end_date: DateTime<Utc>,
+    pub periodicity_unit: i32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -67,8 +66,7 @@ pub struct RepeatedActivityModelResponse {
     pub duration_in_seconds: i32,
     pub description: String,
     pub periodicity: EnumModelResponse,
-    pub start_date: String,
-    pub end_date: String,
+    pub periodicity_unit: i32,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

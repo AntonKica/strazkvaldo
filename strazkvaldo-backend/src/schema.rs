@@ -36,8 +36,7 @@ pub struct CreateRepeatedActivity {
     //#[serde(skip_serializing_if = "Option::is_none")]
     pub description: String,
     pub periodicity: String,
-    pub start_date: DateTime<Utc>,
-    pub end_date: DateTime<Utc>,
+    pub periodicity_unit: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -48,8 +47,7 @@ pub struct UpdateRepeatedActivity {
     pub duration_in_seconds: i32,
     pub description: String,
     pub periodicity: String,
-    pub start_date: DateTime<Utc>,
-    pub end_date: DateTime<Utc>,
+    pub periodicity_unit: i32,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub struct CreateAppUser {

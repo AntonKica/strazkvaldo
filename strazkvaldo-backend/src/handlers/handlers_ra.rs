@@ -6,6 +6,7 @@ use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use std::str::FromStr;
 
 fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
@@ -30,8 +31,7 @@ fn filter_db_record(
         )
         .unwrap(),
         description: repeated_activity_model.description.to_owned(),
-        start_date: repeated_activity_model.start_date.to_rfc3339(),
-        end_date: repeated_activity_model.end_date.to_rfc3339(),
+        periodicity_unit: repeated_activity_model.periodicity_unit,
     }
 }
 
@@ -91,11 +91,45 @@ pub async fn get_repeated_activity(
     }
 }
 
+fn check_periodicity(periodicity: &Periodicity, periodicity_unit: i32) -> Result<(), HttpResponse> {
+    match periodicity {
+        Periodicity::Day => Ok(()),
+        Periodicity::Week => {
+            if periodicity_unit >= 1 && periodicity_unit <= 7 {
+                Ok(())
+            } else {
+                Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "day if week is out of range"})))
+            }
+        }
+        Periodicity::Month => {
+            if periodicity_unit >= 1 && periodicity_unit <= 12 {
+                Ok(())
+            } else {
+                Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "month of year is out of range"})))
+            }
+        }
+        Periodicity::Year => {
+            if periodicity_unit >= 1 && periodicity_unit <= 12 {
+                Ok(())
+            } else {
+                Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "month of year is out of range"})))
+            }
+        }
+    }
+}
+
 #[post("/repeated-activity")]
 pub async fn post_repeated_activity(
     body: web::Json<CreateRepeatedActivity>,
     data: web::Data<AppState>,
 ) -> impl Responder {
+    if let Err(error) = check_periodicity(
+        &Periodicity::from_str(body.periodicity.as_str()).unwrap(),
+        body.periodicity_unit,
+    ) {
+        return error;
+    }
+
     let top_code: String =
         sqlx::query_scalar("SELECT code FROM repeated_activity ORDER BY code DESC LIMIT 1")
             .fetch_one(&data.db)
@@ -112,7 +146,7 @@ pub async fn post_repeated_activity(
 
     let query_result = sqlx::query_as!(
         RepeatedActivityModel,
-        r#"INSERT INTO repeated_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,periodicity,start_date,end_date) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *"#,
+        r#"INSERT INTO repeated_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,periodicity,periodicity_unit) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) returning *"#,
         next_code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
@@ -120,8 +154,7 @@ pub async fn post_repeated_activity(
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
         body.periodicity.to_owned(),
-        body.start_date.to_owned(),
-        body.end_date.to_owned(),
+        body.periodicity_unit.to_owned()
     )
         .fetch_one(&data.db)
         .await;
@@ -150,6 +183,13 @@ pub async fn patch_repeated_activity(
     body: web::Json<UpdateRepeatedActivity>,
     data: web::Data<AppState>,
 ) -> impl Responder {
+    if let Err(error) = check_periodicity(
+        &Periodicity::from_str(body.periodicity.as_str()).unwrap(),
+        body.periodicity_unit,
+    ) {
+        return error;
+    }
+
     let code = path.into_inner();
     let query_result = sqlx::query_as!(
         RepeatedActivityModel,
@@ -169,7 +209,7 @@ pub async fn patch_repeated_activity(
 
     let query_result = sqlx::query_as!(
         RepeatedActivityModel,
-        "UPDATE repeated_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, description = $6, periodicity = $7, start_date = $8, end_date = $9 WHERE code = $1 RETURNING *",
+        "UPDATE repeated_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, description = $6, periodicity = $7, periodicity_unit = $8 WHERE code = $1 RETURNING *",
         code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
@@ -177,8 +217,7 @@ pub async fn patch_repeated_activity(
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
         body.periodicity.to_owned(),
-        body.start_date.to_owned(),
-        body.end_date.to_owned(),
+        body.periodicity_unit.to_owned(),
     ) .fetch_one(&data.db)
         .await
         ;

@@ -3,7 +3,7 @@
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
     import { SVC_USER_REPEATED_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds, to_html_date } from '$lib/common';
+    import { to_duration_in_seconds } from '$lib/common';
     
 	let { data }: PageProps = $props();
 	const activity_types = data.activity_types;
@@ -18,9 +18,8 @@
         
         const formatted_data = {
 			...formEntries,
-			start_date: from_html_date(formEntries.start_date),
-			end_date: from_html_date(formEntries.end_date),
-			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours))
+			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours)),
+			periodicity_unit: Number(formEntries.periodicity_unit)
         };
         
 		fetch(SVC_USER_REPEATED_ACTIVITY.POST(), {
@@ -62,8 +61,9 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label>dátum do <input type="date" name="start_date" value={to_html_date(new Date(Date.now()).toISOString())}></label> <br>
-	<label>dátum od <input type="date" name="end_date" value={to_html_date(new Date(9999,1,1).toISOString())}></label> <br>
+    <label> jednotka opakovania 
+        <input type="number" name="periodicity_unit"/>
+	 </label> <br>
 	<label>trvanie 
 		<input type="number" name="duration_hours" min="0" max="24" step="1"> hodín
 		<input type="number" name="duration_minutes" min="0" max="60" step="1"> minút
