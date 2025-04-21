@@ -1,28 +1,13 @@
 // place files you want to import through the `$lib` alias in this folder.
-export function app_user_role_code_to_string(app_user_role_code: number): string {
-    switch(app_user_role_code) {
-        case 0: return "adminstrátor";
-        case 1: return "používateľ";
-        default: return "neznáma rola";
-    };
-}
-export function app_user_role_to_string(app_user_role: AppUserRole): string {
-    switch(app_user_role) {
-        case AppUserRole.Administrator: return "adminstrátor";
-        case AppUserRole.User: return "používateľ";
-        default: return "neznáma rola";
-    };
-}
-
 export enum AppUserRole {
     Unsigned='unknon',
-    Administrator='admin',
-    User='user',
+    Admin='Admin',
+    User='User',
 }
-export function app_user_role_from_int(appUserRole: string): AppUserRole {
+export function app_user_role_from_string(appUserRole: string): AppUserRole {
     switch(appUserRole) {
-        case 'admin': return AppUserRole.Administrator;
-        case 'user': return AppUserRole.User;
+        case 'Admin': return AppUserRole.Admin;
+        case 'User': return AppUserRole.User;
         default: return AppUserRole.Unsigned;
     };
 }
@@ -48,7 +33,6 @@ export function datetime_rfc3339_to_string(datetime_rfc3339: string): string {
 }
 export function to_html_date(datetime_rfc3339: string): string {
     let date = new Date(Date.parse(datetime_rfc3339));
-    //day += 1;
     let res = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${(date.getDate()).toString().padStart(2, "0")}`;
     return res;
 }

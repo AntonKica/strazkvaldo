@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { base } from '$app/paths';
-    import { app_user_role_from_int, AppUserRole } from '$lib/common';
+    import { app_user_role_from_string } from '$lib/common';
 	import { auth } from '$lib/userState.svelte';
     
 	let username: string = "";
@@ -33,7 +33,7 @@
         }
 
         const body = await response.json();
-        auth.login(username, body.code, app_user_role_from_int(body.role as number));
+        auth.login(username, body.code, app_user_role_from_string(body.role));
         goto(`${base}/`)
     }
 </script>

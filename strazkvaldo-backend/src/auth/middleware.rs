@@ -1,3 +1,4 @@
+use crate::application_enums::AppUserRole;
 use actix_session::{Session, SessionExt};
 use actix_web::body::EitherBody;
 use actix_web::dev::{ServiceRequest, ServiceResponse};
@@ -44,12 +45,12 @@ pub fn is_authenticated(session: &Session) -> bool {
 pub async fn check_role_middleware(
     req: ServiceRequest,
     next: Next<impl actix_web::body::MessageBody + 'static>,
-    required_role: String,
+    required_role: AppUserRole,
 ) -> Result<ServiceResponse<EitherBody<impl actix_web::body::MessageBody>>, Error> {
     let session = req.get_session();
 
     // Then check role
-    if let Some(role) = session.get::<String>("role")? {
+    if let Some(role) = session.get::<AppUserRole>("role")? {
         if has_required_role(&role, &required_role) {
             return next
                 .call(req)
@@ -68,10 +69,10 @@ pub async fn check_role_middleware(
     ))
 }
 
-fn has_required_role(user_role: &String, required_role: &String) -> bool {
-    match (user_role.as_str(), required_role.as_str()) {
-        ("admin", _) => true, // Admins can access anything
-        ("user", "user") => true,
+fn has_required_role(user_role: &AppUserRole, required_role: &AppUserRole) -> bool {
+    match (user_role, required_role) {
+        (AppUserRole::Admin, _) => true, // Admins can access anything
+        (AppUserRole::User, AppUserRole::User) => true,
         _ => false,
     }
 }

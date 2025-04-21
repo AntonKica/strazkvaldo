@@ -56,7 +56,6 @@
             <td>Kritickosť</td>
             <td>Trvanie</td>
             <td>Kedy</td>
-            <td>Popis</td>
             <td></td>
         </tr>
     </thead>
@@ -69,7 +68,6 @@
             <td>{one_time_activity.criticality_type.text}</td>
             <td>{duration_in_seconds_to_string(one_time_activity.duration_in_seconds)}</td>
             <td>{datetime_rfc3339_to_string(one_time_activity.date)}</td>
-            <td>{one_time_activity.description}</td>
             <td><a href="{base}/user/one-time-activity/{one_time_activity.code}/view/">pozri</a></td>
         </tr>
 {/each}

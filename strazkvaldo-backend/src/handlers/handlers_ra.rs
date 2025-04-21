@@ -1,4 +1,5 @@
-use crate::handlers::handlers_enum::{get_enum_for, EnumType};
+use crate::application_enums::{CriticalityType, Periodicity};
+use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum, EnumType};
 use crate::model::{RepeatedActivityModel, RepeatedActivityModelResponse};
 use crate::schema::{CreateRepeatedActivity, FilterOptions, UpdateRepeatedActivity};
 use crate::AppState;
@@ -19,25 +20,18 @@ fn filter_db_record(
             data,
         )
         .unwrap(),
-        criticality_type: get_enum_for(
-            EnumType::CriticalityType.into(),
-            repeated_activity_model.criticality_type.to_owned(),
-            data,
+        criticality_type: get_enum_for_application_enum::<CriticalityType>(
+            repeated_activity_model.criticality_type.clone(),
         )
         .unwrap(),
         duration_in_seconds: repeated_activity_model.duration_in_seconds.to_owned(),
+        periodicity: get_enum_for_application_enum::<Periodicity>(
+            repeated_activity_model.periodicity.clone(),
+        )
+        .unwrap(),
         description: repeated_activity_model.description.to_owned(),
-        periodicity: repeated_activity_model.periodicity.to_owned(),
-        start_date: repeated_activity_model
-            .start_date
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
-        end_date: repeated_activity_model
-            .end_date
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
+        start_date: repeated_activity_model.start_date.to_rfc3339(),
+        end_date: repeated_activity_model.end_date.to_rfc3339(),
     }
 }
 
@@ -86,7 +80,7 @@ pub async fn get_repeated_activity(
     .await
     {
         Ok(repeated_activity) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "repeated_activity": repeated_activity, })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "repeated_activity": filter_db_record(&repeated_activity, &data), })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {

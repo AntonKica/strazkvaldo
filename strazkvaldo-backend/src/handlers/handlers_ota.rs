@@ -1,4 +1,5 @@
-use crate::handlers::handlers_enum::{get_enum_for, EnumType};
+use crate::application_enums::CriticalityType;
+use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum, EnumType};
 use crate::model::{OneTimeActivityModel, OneTimeActivityModelResponse};
 use crate::schema::{CreateOneTimeActivity, FilterOptions, UpdateOneTimeActivity};
 use crate::AppState;
@@ -19,10 +20,8 @@ fn filter_db_record(
             data,
         )
         .unwrap(),
-        criticality_type: get_enum_for(
-            EnumType::CriticalityType.into(),
-            one_time_activity_model.criticality_type.to_owned(),
-            data,
+        criticality_type: get_enum_for_application_enum::<CriticalityType>(
+            one_time_activity_model.criticality_type.clone(),
         )
         .unwrap(),
         duration_in_seconds: one_time_activity_model.duration_in_seconds.to_owned(),
@@ -170,7 +169,7 @@ pub async fn patch_one_time_activity(
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
         body.date.to_owned(),
-    ) .fetch_one(&data.db)
+    ).fetch_one(&data.db)
         .await
         ;
     match query_result {

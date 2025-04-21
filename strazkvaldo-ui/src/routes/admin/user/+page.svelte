@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
     import { base } from '$app/paths';
-	import {app_user_role_code_to_string, app_user_role_to_string} from '$lib/common';
 	let { data }: PageProps = $props();
     console.log(data);
 </script>
@@ -26,7 +25,7 @@
     <tr>
         <td>{app_user.code}</td>
         <td>{app_user.username}</td>
-        <td>{app_user_role_code_to_string(app_user.app_user_role)}</td>
+        <td>{app_user.app_user_role.text}</td>
         <td>{app_user.created}</td>
         <td>{app_user.updated}</td>
         <td><a href="{base}/admin/user/{app_user.code}/view">pozri</a></td>

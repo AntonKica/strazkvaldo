@@ -66,7 +66,7 @@ pub struct RepeatedActivityModelResponse {
     pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
     pub description: String,
-    pub periodicity: String,
+    pub periodicity: EnumModelResponse,
     pub start_date: String,
     pub end_date: String,
 }

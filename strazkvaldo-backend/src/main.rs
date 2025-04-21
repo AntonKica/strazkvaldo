@@ -1,3 +1,4 @@
+mod application_enums;
 mod auth;
 mod handlers;
 mod model;

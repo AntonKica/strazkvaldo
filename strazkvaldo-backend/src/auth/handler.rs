@@ -1,8 +1,10 @@
+use crate::application_enums::AppUserRole;
 use crate::model::AppUserModel;
 use crate::AppState;
 use actix_web::web;
 use actix_web::HttpResponse;
 use sha2::{Digest, Sha512};
+use std::str::FromStr;
 
 #[derive(serde::Deserialize, Debug, serde::Serialize)]
 pub struct LoginUser {
@@ -47,7 +49,10 @@ async fn login_user(
         .insert("code", user.code.clone())
         .expect("Unable to renew username");
     session
-        .insert("role", user.app_user_role.clone())
+        .insert(
+            "role",
+            AppUserRole::from_str(user.app_user_role.as_str()).unwrap(),
+        )
         .expect("Unable to renew password");
 
     HttpResponse::Ok().json(

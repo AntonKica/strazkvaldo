@@ -1,6 +1,8 @@
+use crate::application_enums::AppUserRole;
 use crate::auth;
 use actix_web::middleware::from_fn;
 use actix_web::web;
+
 mod handlers_enum;
 mod handlers_ota;
 mod handlers_ra;
@@ -12,7 +14,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(
             web::scope("/admin")
                 .wrap(from_fn(|req, srv| async move {
-                    auth::middleware::check_role_middleware(req, srv, "admin".into()).await
+                    auth::middleware::check_role_middleware(req, srv, AppUserRole::Admin).await
                 }))
                 .service(handlers_user::get_app_user)
                 .service(handlers_user::get_app_user_list)
@@ -22,7 +24,7 @@ pub fn config(conf: &mut web::ServiceConfig) {
         .service(
             web::scope("/user")
                 .wrap(from_fn(|req, srv| async move {
-                    auth::middleware::check_role_middleware(req, srv, "user".into()).await
+                    auth::middleware::check_role_middleware(req, srv, AppUserRole::User).await
                 }))
                 .service(handlers_ota::get_one_time_activity_list)
                 .service(handlers_ota::get_one_time_activity)
@@ -37,6 +39,9 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_room::post_room)
                 .service(handlers_room::patch_room),
         )
+        .service(handlers_enum::get_app_user_role)
+        .service(handlers_enum::get_criticality_type)
+        .service(handlers_enum::get_periodicity)
         .service(handlers_enum::get_enum);
 
     conf.service(scope);

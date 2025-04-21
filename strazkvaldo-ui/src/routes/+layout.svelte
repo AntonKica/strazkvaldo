@@ -17,7 +17,7 @@
 <ul id="menu">
 	<li><a href="{base}/">Domov</a></li> |
 	<li><a href="{base}/about">O aplikácií</a></li> |
-	{#if auth.userState.role == AppUserRole.Administrator}
+	{#if auth.userState.role == AppUserRole.Admin}
 	<li style="color:indianred">Admin</li> |
 	<li><a style="color:indianred" href="{base}/admin/user">Správa používateľov</a></li> |
 	<li><a style="color:indianred" href="{base}/admin/enum">Správa číselníkov</a></li> |

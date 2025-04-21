@@ -1,4 +1,5 @@
-use crate::handlers::handlers_enum::{get_enum_for, EnumType};
+use crate::application_enums::AppUserRole;
+use crate::handlers::handlers_enum::get_enum_for_application_enum;
 use crate::model::{AppUserModel, AppUserModelResponse};
 use crate::schema::{CreateAppUser, FilterOptions, UpdateAppUser};
 use crate::AppState;
@@ -18,10 +19,8 @@ pub fn filter_db_record(
         last_name: app_user_model.last_name.to_owned(),
         email: app_user_model.email.to_owned(),
         username: app_user_model.username.to_owned(),
-        app_user_role: get_enum_for(
-            EnumType::AppUserRole.into(),
-            app_user_model.app_user_role.to_owned(),
-            data,
+        app_user_role: get_enum_for_application_enum::<AppUserRole>(
+            app_user_model.app_user_role.clone(),
         )
         .unwrap(),
         created: app_user_model
