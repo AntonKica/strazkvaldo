@@ -1,0 +1,24 @@
+import { SVC_USER_REPEATED_ACTIVITY, SVC_ENUM_ACTIVITY_TYPE, SVC_ENUM_CRITICALITY_TYPE, SVC_ENUM_PERIODICITY } from '$lib/serviceRoutes';
+import type { LayoutLoad } from './$types';
+
+export const load: LayoutLoad = async ({ params, fetch }) => {
+    let repeated_activity_result = await fetch(SVC_USER_REPEATED_ACTIVITY.GET(params.code)).then(response => {
+        return response.json();
+    });
+    let activity_type_result = await fetch(SVC_ENUM_ACTIVITY_TYPE.LIST()).then(response => {
+        return response.json();
+    });
+    let criticality_type_result = await fetch(SVC_ENUM_CRITICALITY_TYPE.LIST()).then(response => {
+        return response.json();
+    });
+    let periodicity_result = await fetch(SVC_ENUM_PERIODICITY.LIST()).then(response => {
+        return response.json();
+    });
+
+    return {
+        repeated_activity: repeated_activity_result.data.repeated_activity,
+        activity_types: activity_type_result.enum_values,
+        criticality_types: criticality_type_result.enum_values,
+        periodicity_result: periodicity_result.enum_values,
+    };
+};

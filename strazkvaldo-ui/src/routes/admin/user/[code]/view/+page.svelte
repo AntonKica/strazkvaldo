@@ -2,7 +2,6 @@
 	import { goto } from '$app/navigation';
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
-	import {app_user_role_to_string} from '$lib/common';
 
 	let { data }: PageProps = $props();
 </script>
@@ -13,7 +12,7 @@
 <b>priezvisko</b> {data.user.last_name} <br>
 <b>email</b> {data.user.email} <br>
 <b>používateľské meno</b> {data.user.username} <br>
-<b>rola</b> {app_user_role_to_string(data.user.app_user_role)}
+<b>rola</b> {data.user.app_user_role.text}
 
 <br>
 <br>
