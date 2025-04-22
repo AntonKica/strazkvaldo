@@ -5,12 +5,16 @@ mod model;
 mod schema;
 mod tests;
 
+use crate::handlers::handlers_activities::generate_finished_activities_for_today;
 use crate::model::EnumModel;
 use actix_web::middleware::from_fn;
 use actix_web::web::scope;
 use actix_web::{middleware, web, App, HttpServer};
 use sqlx::postgres::{PgPool, PgPoolOptions};
 use std::cmp::PartialEq;
+use std::ops::Deref;
+use std::sync::Arc;
+use tokio_cron_scheduler::{Job, JobScheduler};
 
 pub struct AppState {
     db: PgPool,
@@ -70,12 +74,25 @@ async fn main() -> std::io::Result<()> {
 
     let secret_key = actix_web::cookie::Key::generate();
 
+    let app_data = web::Data::new(AppState {
+        db: pool.clone(),
+        enum_values: enum_values.clone(),
+    });
+    let cron_data = Arc::clone(&app_data);
+
+    let sched = JobScheduler::new().await.unwrap();
+
+    // Add cron job with access to the data
+    let job = Job::new("0 0 1 * * *", move |_uuid, _l| {
+        let data = Arc::clone(&cron_data);
+        actix_rt::spawn(async move { generate_finished_activities_for_today(&data.db).await });
+    })
+    .unwrap();
+    sched.add(job).await.unwrap();
+
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(AppState {
-                db: pool.clone(),
-                enum_values: enum_values.clone(),
-            }))
+            .app_data(web::Data::new(Arc::clone(&app_data)))
             .wrap(from_fn(auth::middleware::auth_middleware))
             .wrap(match environment {
                 Environment::Development => actix_session::SessionMiddleware::builder(

@@ -3,6 +3,7 @@
     import { goto } from '$app/navigation';
     import { AppUserRole } from '$lib/common';
 	import { auth } from '$lib/userState.svelte';
+    import { UI_USER_FINISHED_ACTIVITY } from '$lib/uiRoutes';
 
 	let { children } = $props();
 </script>
@@ -29,7 +30,7 @@
 	<li><a style="color:#117a65" href="{base}/user/one-time-activity">Správa jednorázových aktivít</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/repeated-activity">Správa opakovaných aktivít</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/upcoming-activities">Najbližšie aktivity</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/recent-activities">Nedávne aktivity</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_FINISHED_ACTIVITY.LIST()}>Dokončené aktivity</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/notifications">Notifikácie</a></li> |
 	<li><a style="color:#117a65" href="{base}/user/settings">Nastavenia</a></li> |
 	{/if}

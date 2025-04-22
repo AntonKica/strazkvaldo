@@ -1,8 +1,10 @@
 <script lang="ts">
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
+    import { UI_USER_ONE_TIME_ACTIVITY, UI_USER_REPEATED_ACTIVITY } from '$lib/uiRoutes';
 
 	let { data }: PageProps = $props();
+    let upcomingActivities = data.upcoming_activities;
 </script>
 
 <h1>Nadchádzajúce aktivity</h1>
@@ -10,21 +12,23 @@
 <table>
     <thead>
         <tr>
-            <td>Názov</td>
-            <td>Typ</td>
-            <td>Popis</td>
-            <td></td>
-            <td></td>
+            <td>názov</td>
+            <td>datum</td>
+            <td>aktivita</td>
         </tr>
     </thead>
     <tbody>
-{#each data.upcomingActivities as upcomingActivity}
+{#each upcomingActivities as upcomingActivity}
 		<tr>
             <td>{upcomingActivity.name}</td>
-            <td>{upcomingActivity.type}</td>
-            <td>{upcomingActivity.date}</td>
-            <td><a href="{base}/user/activity/view/{upcomingActivity.id}">aktivita</a></td>
-            <td><a href="#">pozri</a></td>
+            <td>{upcomingActivity.due_date}</td>
+            <td>
+            {#if upcomingActivity.one_time_activity_code}
+                <a href={UI_USER_ONE_TIME_ACTIVITY.VIEW(upcomingActivity.one_time_activity_code)}>aktivita</a>
+            {:else}
+                <a href={UI_USER_REPEATED_ACTIVITY.VIEW(upcomingActivity.repeated_activity_code)}>aktivita</a>
+            {/if}
+            </td>
         </tr>
 {/each}
     </tbody>

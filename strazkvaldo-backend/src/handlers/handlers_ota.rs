@@ -6,10 +6,11 @@ use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use std::sync::Arc;
 
 fn filter_db_record(
     one_time_activity_model: &OneTimeActivityModel,
-    data: &web::Data<AppState>,
+    data: &web::Data<Arc<AppState>>,
 ) -> OneTimeActivityModelResponse {
     OneTimeActivityModelResponse {
         code: one_time_activity_model.code.to_owned(),
@@ -17,7 +18,7 @@ fn filter_db_record(
         activity_type: get_enum_for(
             EnumType::ActivityType,
             one_time_activity_model.activity_type.to_owned(),
-            data,
+            data.clone(),
         )
         .unwrap(),
         criticality_type: get_enum_for_application_enum::<CriticalityType>(
@@ -32,7 +33,7 @@ fn filter_db_record(
 
 #[get("/one-time-activity")]
 pub async fn get_one_time_activity_list(
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
@@ -63,7 +64,7 @@ pub async fn get_one_time_activity_list(
 #[get("/one-time-activity/{code}")]
 pub async fn get_one_time_activity(
     path: web::Path<String>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let code = path.into_inner();
     match sqlx::query_as!(
@@ -88,7 +89,7 @@ pub async fn get_one_time_activity(
 #[post("/one-time-activity")]
 pub async fn post_one_time_activity(
     body: web::Json<CreateOneTimeActivity>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let top_code: String =
         sqlx::query_scalar("SELECT code FROM one_time_activity ORDER BY code DESC LIMIT 1")
@@ -140,7 +141,7 @@ pub async fn post_one_time_activity(
 pub async fn patch_one_time_activity(
     path: web::Path<String>,
     body: web::Json<UpdateOneTimeActivity>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let code = path.into_inner();
     let query_result = sqlx::query_as!(

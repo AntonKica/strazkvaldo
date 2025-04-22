@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
@@ -94,4 +94,40 @@ pub struct EnumModel {
 pub struct EnumModelResponse {
     pub code: String,
     pub text: String,
+}
+
+#[derive(Debug)]
+pub struct UpcomingActivity {
+    pub name: String,
+    pub repeated_activity_code: Option<String>,
+    pub one_time_activity_code: Option<String>,
+    pub due_date: NaiveDate,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UpcomingActivityResponse {
+    pub name: String,
+    pub repeated_activity_code: Option<String>,
+    pub one_time_activity_code: Option<String>,
+    pub due_date: String,
+}
+
+#[derive(Debug)]
+pub struct FinishedActivity {
+    pub name: String,
+    pub repeated_activity_code: String,
+    pub one_time_activity_code: String,
+    pub due_date: NaiveDate,
+    pub description: String,
+    pub reviewed: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FinishedActivityResponse {
+    pub code: String,
+    pub repeated_activity_code: Option<String>,
+    pub one_time_activity_code: Option<String>,
+    pub due_date: String,
+    pub description: String,
+    pub reviewed: bool,
 }

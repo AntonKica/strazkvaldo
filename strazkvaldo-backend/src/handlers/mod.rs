@@ -3,6 +3,7 @@ use crate::auth;
 use actix_web::middleware::from_fn;
 use actix_web::web;
 
+pub mod handlers_activities;
 mod handlers_enum;
 mod handlers_ota;
 mod handlers_ra;
@@ -37,7 +38,9 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_room::get_room_list)
                 .service(handlers_room::get_room)
                 .service(handlers_room::post_room)
-                .service(handlers_room::patch_room),
+                .service(handlers_room::patch_room)
+                .service(handlers_activities::get_upcoming_activities)
+                .service(handlers_activities::get_finished_activity_list),
         )
         .service(handlers_enum::get_app_user_role)
         .service(handlers_enum::get_criticality_type)

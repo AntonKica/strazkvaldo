@@ -5,19 +5,25 @@ use crate::AppState;
 use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use std::sync::Arc;
 
-fn filter_db_record(room_model: &RoomModel, data: &web::Data<AppState>) -> RoomModelResponse {
+fn filter_db_record(room_model: &RoomModel, data: &web::Data<Arc<AppState>>) -> RoomModelResponse {
     RoomModelResponse {
         code: room_model.code.to_owned(),
         name: room_model.name.to_owned(),
-        room_type: get_enum_for(EnumType::RoomType, room_model.room_type.to_owned(), data).unwrap(),
+        room_type: get_enum_for(
+            EnumType::RoomType,
+            room_model.room_type.to_owned(),
+            data.clone(),
+        )
+        .unwrap(),
         description: room_model.description.to_owned(),
     }
 }
 
 #[get("/room")]
 pub async fn get_room_list(
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
@@ -46,7 +52,7 @@ pub async fn get_room_list(
     HttpResponse::Ok().json(json_response)
 }
 #[get("/room/{code}")]
-pub async fn get_room(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+pub async fn get_room(path: web::Path<String>, data: web::Data<Arc<AppState>>) -> impl Responder {
     let code = path.into_inner();
     match sqlx::query_as!(RoomModel, "SELECT * FROM room WHERE code = $1", code)
         .fetch_one(&data.db)
@@ -65,7 +71,10 @@ pub async fn get_room(path: web::Path<String>, data: web::Data<AppState>) -> imp
 }
 
 #[post("/room")]
-pub async fn post_room(body: web::Json<CreateRoom>, data: web::Data<AppState>) -> impl Responder {
+pub async fn post_room(
+    body: web::Json<CreateRoom>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
     let top_code: String = sqlx::query_scalar("SELECT code FROM room ORDER BY code DESC LIMIT 1")
         .fetch_one(&data.db)
         .await
@@ -110,7 +119,7 @@ pub async fn post_room(body: web::Json<CreateRoom>, data: web::Data<AppState>) -
 pub async fn patch_room(
     path: web::Path<String>,
     body: web::Json<UpdateRoom>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let code = path.into_inner();
     let query_result = sqlx::query_as!(RoomModel, "SELECT * FROM room WHERE code = $1", code)

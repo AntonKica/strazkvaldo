@@ -5,6 +5,7 @@ use actix_web::http::header::*;
 use actix_web::web::Data;
 use actix_web::{get, web, HttpResponse, Responder};
 use std::str::FromStr;
+use std::sync::Arc;
 
 pub enum EnumType {
     RoomType,
@@ -36,7 +37,7 @@ pub fn filter_db_record(enum_model: &EnumModel) -> EnumModelResponse {
 pub fn get_enum_for(
     enum_type: EnumType,
     code: String,
-    data: &Data<AppState>,
+    data: Data<Arc<AppState>>,
 ) -> Option<EnumModelResponse> {
     data.enum_values
         .iter()
@@ -45,7 +46,7 @@ pub fn get_enum_for(
 }
 
 #[get("/enum/{name}")]
-pub async fn get_enum(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+pub async fn get_enum(path: web::Path<String>, data: web::Data<Arc<AppState>>) -> impl Responder {
     let name = path.into_inner();
     if enum_string_to_enum_type(&name).is_none() {
         return HttpResponse::BadRequest()
@@ -86,11 +87,11 @@ pub fn get_enum_for_application_enum<T: FromStr + ToString + EnumModelResponseTr
     }
 }
 #[get("/enum/app-user-role")]
-pub async fn get_app_user_role(data: web::Data<AppState>) -> impl Responder {
+pub async fn get_app_user_role(data: web::Data<Arc<AppState>>) -> impl Responder {
     application_enum_crete_response(vec![AppUserRole::Admin, AppUserRole::User])
 }
 #[get("/enum/criticality-type")]
-pub async fn get_criticality_type(data: web::Data<AppState>) -> impl Responder {
+pub async fn get_criticality_type(data: web::Data<Arc<AppState>>) -> impl Responder {
     application_enum_crete_response(vec![
         CriticalityType::Low,
         CriticalityType::Medium,
@@ -98,7 +99,7 @@ pub async fn get_criticality_type(data: web::Data<AppState>) -> impl Responder {
     ])
 }
 #[get("/enum/periodicity")]
-pub async fn get_periodicity(data: web::Data<AppState>) -> impl Responder {
+pub async fn get_periodicity(data: web::Data<Arc<AppState>>) -> impl Responder {
     application_enum_crete_response(vec![
         Periodicity::Day,
         Periodicity::Week,

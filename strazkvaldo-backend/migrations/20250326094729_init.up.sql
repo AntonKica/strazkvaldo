@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS repeated_activity("code" CHAR(7) PRIMARY KEY NOT NULL
     "duration_in_seconds" INT NOT NULL,
     "description" TEXT NOT NULL,
     "periodicity" VARCHAR(16) NOT NULL,
-    "start_date" TIMESTAMPTZ NOT NULL,
-    "end_date" TIMESTAMPTZ NOT NULL
+    "periodicity_unit" INT NOT NULL
     );
 CREATE TABLE IF NOT EXISTS app_user("code" CHAR(8) PRIMARY KEY NOT NULL,
     "first_name" VARCHAR(80) NOT NULL,
@@ -39,6 +38,16 @@ CREATE TABLE IF NOT EXISTS room("code" CHAR(9) PRIMARY KEY NOT NULL,
     "name" VARCHAR(80) NOT NULL,
     "room_type" VARCHAR(16) NOT NULL REFERENCES enum_values("code"),
     "description" TEXT NOT NULL
+    );
+
+CREATE TABLE IF NOT EXISTS finished_activity("code" CHAR(9) PRIMARY KEY NOT NULL,
+    "one_time_activity_code" CHAR(8) NULL REFERENCES one_time_activity("code"),
+    "repeated_activity_code" CHAR(7) NULL REFERENCES repeated_activity("code"),
+    "due_date" DATE NOT NULL,
+    "description" TEXT NOT NULL,
+    "reviewed" BOOLEAN NOT NULL,
+    UNIQUE ("one_time_activity_code", "due_date"),
+    UNIQUE ("repeated_activity_code", "due_date")
     );
 
 INSERT INTO enum_values("name", "code", "text")
@@ -124,8 +133,7 @@ INSERT INTO repeated_activity("code",
                               "duration_in_seconds",
                               "description",
                               "periodicity",
-                              "start_date",
-                              "end_date"
+                              "periodicity_unit"
 )
 VALUES ('RA-0001',
         'Washing',
@@ -134,8 +142,7 @@ VALUES ('RA-0001',
         3600,
         'Periodical washing of clothes',
         'Month',
-        NOW(),
-        NOW()
+        1
        ),
        ('RA-0002',
         'Dirty floor mopping',
@@ -143,9 +150,8 @@ VALUES ('RA-0001',
         'Low',
         1800,
         'Periodical floor mopping',
-        'Month',
-        NOW(),
-        NOW()
+        'Day',
+        1
        )
 ;
 

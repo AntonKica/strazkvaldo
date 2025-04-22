@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -77,5 +77,20 @@ pub struct CreateRoom {
 pub struct UpdateRoom {
     pub name: String,
     pub room_type: String,
+    pub description: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FinishedActivityModel {
+    pub code: String,
+    pub repeated_activity_code: Option<String>,
+    pub one_time_activity_code: Option<String>,
+    pub due_date: NaiveDate,
+    pub description: String,
+    pub reviewed: bool,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FinishedActivityUpdateModel {
     pub description: String,
 }

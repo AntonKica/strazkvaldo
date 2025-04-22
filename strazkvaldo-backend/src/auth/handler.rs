@@ -5,6 +5,7 @@ use actix_web::web;
 use actix_web::HttpResponse;
 use sha2::{Digest, Sha512};
 use std::str::FromStr;
+use std::sync::Arc;
 
 #[derive(serde::Deserialize, Debug, serde::Serialize)]
 pub struct LoginUser {
@@ -13,7 +14,7 @@ pub struct LoginUser {
 }
 #[actix_web::post("/login")]
 async fn login_user(
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
     login_data: actix_web::web::Json<LoginUser>,
     session: actix_session::Session,
 ) -> HttpResponse {

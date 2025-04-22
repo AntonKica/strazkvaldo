@@ -8,10 +8,11 @@ use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use chrono::Utc;
 use sha2::{Digest, Sha512};
+use std::sync::Arc;
 
 pub fn filter_db_record(
     app_user_model: &AppUserModel,
-    data: &web::Data<AppState>,
+    data: &web::Data<Arc<AppState>>,
 ) -> AppUserModelResponse {
     AppUserModelResponse {
         code: app_user_model.code.to_owned(),
@@ -38,7 +39,7 @@ pub fn filter_db_record(
 
 #[get("/app-user")]
 pub async fn get_app_user_list(
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
@@ -67,7 +68,10 @@ pub async fn get_app_user_list(
     HttpResponse::Ok().json(json_response)
 }
 #[get("/app-user/{code}")]
-pub async fn get_app_user(path: web::Path<String>, data: web::Data<AppState>) -> impl Responder {
+pub async fn get_app_user(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
     let code = path.into_inner();
     match sqlx::query_as!(AppUserModel, "SELECT * FROM app_user WHERE code = $1", code)
         .fetch_one(&data.db)
@@ -88,7 +92,7 @@ pub async fn get_app_user(path: web::Path<String>, data: web::Data<AppState>) ->
 #[post("/app-user")]
 pub async fn post_app_user(
     body: web::Json<CreateAppUser>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let top_code: String =
         sqlx::query_scalar("SELECT code FROM app_user ORDER BY code DESC LIMIT 1")
@@ -142,7 +146,7 @@ pub async fn post_app_user(
 pub async fn patch_app_user(
     path: web::Path<String>,
     body: web::Json<UpdateAppUser>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let code = path.into_inner();
     let query_result =

@@ -7,10 +7,11 @@ use actix_web::http;
 use actix_web::http::header::*;
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use std::str::FromStr;
+use std::sync::Arc;
 
 fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
-    data: &web::Data<AppState>,
+    data: &web::Data<Arc<AppState>>,
 ) -> RepeatedActivityModelResponse {
     RepeatedActivityModelResponse {
         code: repeated_activity_model.code.to_owned(),
@@ -18,7 +19,7 @@ fn filter_db_record(
         activity_type: get_enum_for(
             EnumType::ActivityType,
             repeated_activity_model.activity_type.to_owned(),
-            data,
+            data.clone(),
         )
         .unwrap(),
         criticality_type: get_enum_for_application_enum::<CriticalityType>(
@@ -37,7 +38,7 @@ fn filter_db_record(
 
 #[get("/repeated-activity")]
 pub async fn get_repeated_activity_list(
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
     let limit = opts.limit.unwrap_or(10);
@@ -68,7 +69,7 @@ pub async fn get_repeated_activity_list(
 #[get("/repeated-activity/{code}")]
 pub async fn get_repeated_activity(
     path: web::Path<String>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     let code = path.into_inner();
     match sqlx::query_as!(
@@ -121,7 +122,7 @@ fn check_periodicity(periodicity: &Periodicity, periodicity_unit: i32) -> Result
 #[post("/repeated-activity")]
 pub async fn post_repeated_activity(
     body: web::Json<CreateRepeatedActivity>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     if let Err(error) = check_periodicity(
         &Periodicity::from_str(body.periodicity.as_str()).unwrap(),
@@ -181,7 +182,7 @@ pub async fn post_repeated_activity(
 pub async fn patch_repeated_activity(
     path: web::Path<String>,
     body: web::Json<UpdateRepeatedActivity>,
-    data: web::Data<AppState>,
+    data: web::Data<Arc<AppState>>,
 ) -> impl Responder {
     if let Err(error) = check_periodicity(
         &Periodicity::from_str(body.periodicity.as_str()).unwrap(),
