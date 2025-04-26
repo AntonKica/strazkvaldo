@@ -45,3 +45,15 @@ export function to_minutes(duration_in_seconds: number): number {
 export function to_duration_in_seconds(minutes: number, hours: number): number {
     return minutes * 60 + hours * 3600;
 }
+export function day_of_week_to_string(day_of_week: Number): string {
+    switch (day_of_week) {
+        case 0: return "nedeľa";
+        case 1: return "pondelok";
+        case 2: return "utorok";
+        case 3: return "streda";
+        case 4: return "štvrtok";
+        case 5: return "piatok";
+        case 6: return "sobota";
+        default: return "neznámy deň";
+    }
+}

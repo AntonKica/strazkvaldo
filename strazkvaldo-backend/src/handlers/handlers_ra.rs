@@ -96,7 +96,7 @@ fn check_periodicity(periodicity: &Periodicity, periodicity_unit: i32) -> Result
     match periodicity {
         Periodicity::Day => Ok(()),
         Periodicity::Week => {
-            if periodicity_unit >= 1 && periodicity_unit <= 7 {
+            if periodicity_unit >= 0 && periodicity_unit <= 6 {
                 Ok(())
             } else {
                 Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "day if week is out of range"})))
