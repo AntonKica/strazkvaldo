@@ -21,8 +21,8 @@ pub struct AppUserModelResponse {
     pub email: String,
     pub username: String,
     pub app_user_role: EnumModelResponse,
-    pub created: String,
-    pub updated: String,
+    pub created: DateTime<Utc>,
+    pub updated: DateTime<Utc>,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub struct OneTimeActivityModel {
@@ -32,7 +32,7 @@ pub struct OneTimeActivityModel {
     pub criticality_type: String,
     pub duration_in_seconds: i32,
     pub description: String,
-    pub date: DateTime<Utc>,
+    pub due_date: NaiveDate,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,7 +43,7 @@ pub struct OneTimeActivityModelResponse {
     pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
     pub description: String,
-    pub date: String,
+    pub due_date: NaiveDate,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub struct RepeatedActivityModel {

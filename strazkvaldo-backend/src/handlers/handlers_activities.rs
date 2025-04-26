@@ -86,7 +86,7 @@ pub async fn get_upcoming_activities(
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where date <= NOW() + interval '1 week'"#
+        r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week'"#
     )
     .fetch_all(&data.db)
     .await
@@ -98,7 +98,7 @@ pub async fn get_upcoming_activities(
             name: ota.name,
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
-            due_date: ota.date.date_naive(),
+            due_date: ota.due_date,
         })
         .collect::<Vec<UpcomingActivity>>();
 
@@ -172,7 +172,7 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where DATE(date) = CURRENT_DATE"#
+        r#"SELECT * FROM one_time_activity where DATE(due_date) = CURRENT_DATE"#
     )
     .fetch_all(db)
     .await
@@ -184,7 +184,7 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
             name: ota.name.clone(),
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
-            due_date: ota.date.date_naive(),
+            due_date: ota.due_date,
         })
         .collect();
     uas_all.append(&mut uas2);

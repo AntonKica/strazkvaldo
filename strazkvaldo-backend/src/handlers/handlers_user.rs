@@ -24,16 +24,8 @@ pub fn filter_db_record(
             app_user_model.app_user_role.clone(),
         )
         .unwrap(),
-        created: app_user_model
-            .created
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
-        updated: app_user_model
-            .updated
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
+        created: app_user_model.created,
+        updated: app_user_model.updated,
     }
 }
 

@@ -27,7 +27,7 @@ fn filter_db_record(
         .unwrap(),
         duration_in_seconds: one_time_activity_model.duration_in_seconds.to_owned(),
         description: one_time_activity_model.description.to_owned(),
-        date: one_time_activity_model.date.to_rfc3339(),
+        due_date: one_time_activity_model.due_date,
     }
 }
 
@@ -107,14 +107,14 @@ pub async fn post_one_time_activity(
 
     let query_result = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"INSERT INTO one_time_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,date) VALUES ($1,$2,$3,$4,$5,$6,$7) returning *"#,
+        r#"INSERT INTO one_time_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,due_date) VALUES ($1,$2,$3,$4,$5,$6,$7) returning *"#,
         next_code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
         body.criticality_type.to_owned(),
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
-        body.date.to_owned(),
+        body.due_date.to_owned(),
     )
         .fetch_one(&data.db)
         .await;
@@ -162,14 +162,14 @@ pub async fn patch_one_time_activity(
 
     let query_result = sqlx::query_as!(
         OneTimeActivityModel,
-        "UPDATE one_time_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, description = $6, date =$7 WHERE code = $1 RETURNING *",
+        "UPDATE one_time_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, description = $6, due_date =$7 WHERE code = $1 RETURNING *",
         code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
         body.criticality_type.to_owned(),
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
-        body.date.to_owned(),
+        body.due_date.to_owned(),
     ).fetch_one(&data.db)
         .await
         ;

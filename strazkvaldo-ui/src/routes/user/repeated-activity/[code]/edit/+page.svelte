@@ -3,7 +3,7 @@
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
     import { SVC_USER_REPEATED_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds, to_hours, to_html_date, to_minutes } from '$lib/common';
+    import { to_duration_in_seconds, to_hours, to_minutes } from '$lib/common';
     import { UI_USER_REPEATED_ACTIVITY } from '$lib/uiRoutes';
 
 	let { data }: PageProps = $props();

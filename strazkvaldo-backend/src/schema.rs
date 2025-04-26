@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -15,7 +15,7 @@ pub struct CreateOneTimeActivity {
     pub duration_in_seconds: i32,
     //#[serde(skip_serializing_if = "Option::is_none")]
     pub description: String,
-    pub date: DateTime<Utc>,
+    pub due_date: NaiveDate,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -25,7 +25,7 @@ pub struct UpdateOneTimeActivity {
     pub criticality_type: String,
     pub duration_in_seconds: i32,
     pub description: String,
-    pub date: DateTime<Utc>,
+    pub due_date: NaiveDate,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateRepeatedActivity {

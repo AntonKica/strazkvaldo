@@ -19,7 +19,6 @@
 
         const formatted_data = {
 			...formEntries,
-			date: from_html_date(formEntries.date),
 			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours))
         };
 		
@@ -62,7 +61,7 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label>dátum <input type="date" name="date" value={to_html_date(one_time_activity.date)}></label> <br>
+	<label>dátum <input type="date" name="due_date" value={one_time_activity.due_date}></label> <br>
 	<label>trvanie 
 		<input type="number" name="duration_hours" min="0" max="24" step="1" value={to_hours(one_time_activity.duration_in_seconds)}> hodín
 		<input type="number" name="duration_minutes" min="0" max="60" step="1" value={to_minutes(one_time_activity.duration_in_seconds)}> minút

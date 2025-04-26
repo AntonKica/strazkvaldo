@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS one_time_activity("code" CHAR(8) PRIMARY KEY NOT NULL
     "criticality_type" VARCHAR(16) NOT NULL,
     "duration_in_seconds" INT NOT NULL,
     "description" TEXT NOT NULL,
-    "date" TIMESTAMPTZ NOT NULL
+    "due_date" DATE NOT NULL
     );
 CREATE TABLE IF NOT EXISTS repeated_activity("code" CHAR(7) PRIMARY KEY NOT NULL,
     "name" VARCHAR(80) NOT NULL UNIQUE,
@@ -106,7 +106,7 @@ INSERT INTO one_time_activity("code",
                               "criticality_type",
                               "duration_in_seconds",
                               "description",
-                              "date"
+                              "due_date"
 )
 VALUES ('OTA-0001',
         'Dirty clothes',
@@ -114,7 +114,7 @@ VALUES ('OTA-0001',
         'Low',
         1800,
         'Got some dirty clothes',
-        NOW()
+        CURRENT_DATE + interval '1 day'
        ),
        ('OTA-0002',
         'Dirty floor',
@@ -122,7 +122,7 @@ VALUES ('OTA-0001',
         'Low',
         1800,
         'There is some dirty kitchen',
-        NOW()
+        CURRENT_DATE + interval '2 days'
        )
 ;
 
