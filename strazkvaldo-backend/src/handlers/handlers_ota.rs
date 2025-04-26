@@ -36,12 +36,22 @@ pub async fn get_one_time_activity_list(
     data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
+    let limit = opts.limit.unwrap_or(100);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM one_time_activity where due_date >= CURRENT_DATE order by due_date desc LIMIT $1 OFFSET $2"#,
+        limit as i64,
+        offset as i64
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap();
+
+    let one_time_activities_expired: Vec<OneTimeActivityModel> = sqlx::query_as!(
+        OneTimeActivityModel,
+        r#"SELECT * FROM one_time_activity where due_date < CURRENT_DATE order by due_date LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -53,11 +63,16 @@ pub async fn get_one_time_activity_list(
         .into_iter()
         .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<OneTimeActivityModelResponse>>();
+    let one_time_activities_expired_response = one_time_activities_expired
+        .into_iter()
+        .map(|note| filter_db_record(&note, &data))
+        .collect::<Vec<OneTimeActivityModelResponse>>();
 
     let json_response = serde_json::json!({
         "status": "success",
         "results":one_time_activities_response.len(),
-        "one_time_activities":one_time_activities_response
+        "one_time_activities":one_time_activities_response,
+        "one_time_activities_expired":one_time_activities_expired_response
     });
     HttpResponse::Ok().json(json_response)
 }

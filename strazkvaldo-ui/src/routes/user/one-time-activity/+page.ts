@@ -6,6 +6,6 @@ export const load: PageLoad = async () => {
         return response.json()
     });
     return {
-        one_time_activities: one_time_activities_result.one_time_activities,
+        ...one_time_activities_result,
     };
 };

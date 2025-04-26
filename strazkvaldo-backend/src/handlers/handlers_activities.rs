@@ -86,7 +86,7 @@ pub async fn get_upcoming_activities(
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week'"#
+        r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week' and due_date >= CURRENT_DATE"#
     )
     .fetch_all(&data.db)
     .await
