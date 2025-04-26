@@ -110,10 +110,10 @@ fn check_periodicity(periodicity: &Periodicity, periodicity_unit: i32) -> Result
             }
         }
         Periodicity::Year => {
-            if periodicity_unit >= 1 && periodicity_unit <= 12 {
+            if periodicity_unit >= 1 && periodicity_unit <= 366 {
                 Ok(())
             } else {
-                Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "month of year is out of range"})))
+                Err(HttpResponse::BadRequest().json(serde_json::json!({"staus": "failed", "message": "day of year is out of range"})))
             }
         }
     }
