@@ -2,8 +2,8 @@
 	import type { PageProps } from './$types';
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
-    import { SVC_ADMIN_APP_USER, SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds } from '$lib/common';
+    import { SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
+    import { to_duration_in_seconds } from '$lib/common';
     
 	let { data }: PageProps = $props();
 	const activity_types = data.activity_types;

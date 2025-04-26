@@ -29,5 +29,6 @@ class EntityRouteUI {
 export const UI_ADMIN_APP_USER = new EntityRouteUI('admin', 'app-user');
 export const UI_USER_ONE_TIME_ACTIVITY = new EntityRouteUI('user', 'one-time-activity');
 export const UI_USER_REPEATED_ACTIVITY = new EntityRouteUI('user', 'repeated-activity');
-export const UI_USER_FINISHED_ACTIVITY = new EntityRouteUI('user', 'finished-activity');
+export const UI_USER_RECENTLY_FINISHED_ACTIVITY = new EntityRouteUI('user', 'recently-finished-activity');
+export const UI_USER_REVIEWED_FINISHED_ACTIVITY = new EntityRouteUI('user', 'reviewed-finished-activity');
 export const UI_USER_ROOM = new EntityRouteUI('user', 'room');

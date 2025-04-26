@@ -91,6 +91,6 @@ pub struct FinishedActivityModel {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct FinishedActivityUpdateModel {
+pub struct ReviewFinishedActivityModel {
     pub description: String,
 }

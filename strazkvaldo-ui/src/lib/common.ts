@@ -36,11 +36,6 @@ export function to_html_date(datetime_rfc3339: string): string {
     let res = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${(date.getDate()).toString().padStart(2, "0")}`;
     return res;
 }
-export function from_html_date(html_date: string): string {
-    let [year, month, day ] = html_date.split("-").map(Number);
-
-    return new Date(year, month - 1, day).toISOString();
-}
 export function to_hours(duration_in_seconds: number): number {
     return duration_in_seconds / 3600 >> 0;
 }

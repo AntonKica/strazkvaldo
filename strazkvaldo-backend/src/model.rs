@@ -127,7 +127,6 @@ pub struct FinishedActivityResponse {
     pub code: String,
     pub repeated_activity_code: Option<String>,
     pub one_time_activity_code: Option<String>,
-    pub due_date: String,
+    pub due_date: NaiveDate,
     pub description: String,
-    pub reviewed: bool,
 }

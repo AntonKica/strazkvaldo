@@ -40,7 +40,10 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_room::post_room)
                 .service(handlers_room::patch_room)
                 .service(handlers_activities::get_upcoming_activities)
-                .service(handlers_activities::get_finished_activity_list),
+                .service(handlers_activities::get_recently_finished_activity_list)
+                .service(handlers_activities::get_recently_finished_activity)
+                .service(handlers_activities::review_recently_finished_activity)
+                .service(handlers_activities::get_reviewed_finished_activity_list),
         )
         .service(handlers_enum::get_app_user_role)
         .service(handlers_enum::get_criticality_type)
