@@ -83,12 +83,16 @@ async fn main() -> std::io::Result<()> {
     let sched = JobScheduler::new().await.unwrap();
 
     // Add cron job with access to the data
-    let job = Job::new("0 0 1 * * *", move |_uuid, _l| {
+    let job = Job::new("0 0 0 * * *", move |_uuid, _l| {
         let data = Arc::clone(&cron_data);
-        actix_rt::spawn(async move { generate_finished_activities_for_today(&data.db).await });
+        tokio::spawn(async move {
+            data.db.acquire().await.unwrap();
+            generate_finished_activities_for_today(&data.db).await;
+        });
     })
     .unwrap();
     sched.add(job).await.unwrap();
+    sched.start().await.unwrap();
 
     HttpServer::new(move || {
         App::new()
