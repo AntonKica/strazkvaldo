@@ -47,13 +47,13 @@ export function to_duration_in_seconds(minutes: number, hours: number): number {
 }
 export function day_of_week_to_string(day_of_week: Number): string {
     switch (day_of_week) {
-        case 0: return "nedeľa";
         case 1: return "pondelok";
         case 2: return "utorok";
         case 3: return "streda";
         case 4: return "štvrtok";
         case 5: return "piatok";
         case 6: return "sobota";
+        case 7: return "nedeľa";
         default: return "neznámy deň";
     }
 }

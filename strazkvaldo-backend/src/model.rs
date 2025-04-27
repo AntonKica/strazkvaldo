@@ -1,5 +1,6 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use sqlx::types::BitVec;
 
 #[derive(Debug, Deserialize, Serialize, sqlx::FromRow)]
 pub struct AppUserModel {
@@ -129,4 +130,17 @@ pub struct FinishedActivityResponse {
     pub one_time_activity_code: Option<String>,
     pub due_date: NaiveDate,
     pub description: String,
+}
+
+#[derive(Debug, sqlx::FromRow)]
+pub struct AppSettingsModel {
+    pub _lock: BitVec,
+    pub auto_review_finished_activity: bool,
+    pub auto_review_finished_activity_days: i32,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AppSettings {
+    pub auto_review_finished_activity: bool,
+    pub auto_review_finished_activity_days: i32,
 }

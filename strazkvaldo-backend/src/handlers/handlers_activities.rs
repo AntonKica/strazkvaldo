@@ -1,4 +1,5 @@
 use crate::application_enums::Periodicity;
+use crate::handlers::handlers_settings::query_app_settings;
 use crate::model::{
     FinishedActivityResponse, OneTimeActivityModel, RepeatedActivityModel, UpcomingActivity,
     UpcomingActivityResponse,
@@ -407,4 +408,21 @@ pub async fn get_reviewed_finished_activity_list(
         "reviewed_finished_activities":one_time_activities_response
     });
     HttpResponse::Ok().json(json_response)
+}
+pub async fn auto_review_finished_activities_for_today(db: &PgPool) {
+    let app_settings = query_app_settings(db).await.unwrap();
+    if !app_settings.auto_review_finished_activity {
+        return;
+    }
+
+    match sqlx::query_as!(
+        FinishedActivityModel,
+        r#"UPDATE finished_activity SET reviewed = true, description = 'Aktivita bola automaticky uzavretá' where reviewed = false and EXTRACT(DAYS FROM AGE(CURRENT_DATE,  due_date)) >= $1"#,
+        app_settings.auto_review_finished_activity_days as i32 // sqlx objects when not cast
+    ).execute(db).await {
+        Ok(_) => (),
+        Err(err) => {
+            println!("Failed to auto review finished activities. {:?}", err);
+        }
+    }
 }

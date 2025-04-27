@@ -37,6 +37,7 @@ export const SVC_USER_ROOM = new EntityRoute('user', 'room');
 export const SVC_USER_UPCOMING_ACTIVITY = new EntityRoute('user', 'upcoming-activity');
 export const SVC_USER_RECENTLY_FINISHED_ACTIVITY = new EntityRoute('user', 'recently-finished-activity');
 export const SVC_USER_REVIEWED_FINISHED_ACTIVITY = new EntityRoute('user', 'reviewed-finished-activity');
+export const SVC_USER_APP_SETTINGS = `/svc/user/app-settings`;
 
 export const SVC_ENUM_APP_USER_ROLE = new EntityRoute('enum', 'app-user-role');
 export const SVC_ENUM_CRITICALITY_TYPE = new EntityRoute('enum', 'criticality-type');

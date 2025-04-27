@@ -5,7 +5,9 @@ mod model;
 mod schema;
 mod tests;
 
-use crate::handlers::handlers_activities::generate_finished_activities_for_today;
+use crate::handlers::handlers_activities::{
+    auto_review_finished_activities_for_today, generate_finished_activities_for_today,
+};
 use crate::model::EnumModel;
 use actix_web::middleware::from_fn;
 use actix_web::web::scope;
@@ -88,6 +90,7 @@ async fn main() -> std::io::Result<()> {
         tokio::spawn(async move {
             data.db.acquire().await.unwrap();
             generate_finished_activities_for_today(&data.db).await;
+            auto_review_finished_activities_for_today(&data.db).await;
         });
     })
     .unwrap();

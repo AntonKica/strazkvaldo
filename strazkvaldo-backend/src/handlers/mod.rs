@@ -8,6 +8,7 @@ mod handlers_enum;
 mod handlers_ota;
 mod handlers_ra;
 mod handlers_room;
+mod handlers_settings;
 mod handlers_user;
 
 pub fn config(conf: &mut web::ServiceConfig) {
@@ -43,7 +44,9 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_activities::get_recently_finished_activity_list)
                 .service(handlers_activities::get_recently_finished_activity)
                 .service(handlers_activities::review_recently_finished_activity)
-                .service(handlers_activities::get_reviewed_finished_activity_list),
+                .service(handlers_activities::get_reviewed_finished_activity_list)
+                .service(handlers_settings::get_app_settings)
+                .service(handlers_settings::patch_app_settings),
         )
         .service(handlers_enum::get_app_user_role)
         .service(handlers_enum::get_criticality_type)
