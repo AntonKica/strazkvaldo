@@ -1,19 +1,19 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
+    import { UI_ADMIN_ENUM_ROOM_TYPE, UI_ADMIN_ENUM_ACTIVITY_TYPE } from '$lib/uiRoutes';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
-    console.log(data);
 </script>
 
 <h1>Číselníky</h1>
 
-<h2>rola</h2>
+<h2>aplikačná rola</h2>
 <table>
     <thead>
         <tr>
             <td>kód</td>
             <td>znenie</td>
-            <td></td>
         </tr>
     </thead>
     <tbody>
@@ -21,7 +21,6 @@
 		<tr>
             <td>{item.code}</td>
             <td>{item.text}</td>
-            <td><a href="#"></a></td>
         </tr>
 {/each}
     </tbody>
@@ -34,7 +33,6 @@
         <tr>
             <td>kód</td>
             <td>znenie</td>
-            <td></td>
         </tr>
     </thead>
     <tbody>
@@ -42,20 +40,40 @@
 		<tr>
             <td>{item.code}</td>
             <td>{item.text}</td>
-            <td><a href="#"></a></td>
+        </tr>
+{/each}
+    </tbody>
+</table>
+
+<hr>
+<h2>periodicita</h2>
+<table>
+    <thead>
+        <tr>
+            <td>kód</td>
+            <td>znenie</td>
+        </tr>
+    </thead>
+    <tbody>
+{#each data.periodicity as item}
+		<tr>
+            <td>{item.code}</td>
+            <td>{item.text}</td>
         </tr>
 {/each}
     </tbody>
 </table>
 <hr>
 
-<h2>typ miesnosti</h2>
+<h2>typ miesnosti </h2>
+<small>
+<button type="button" style="background-color: cadetblue;" onclick={() => goto(UI_ADMIN_ENUM_ROOM_TYPE.EDIT(), { invalidateAll: true})}>uprav číselník</button>
+</small>
 <table>
     <thead>
         <tr>
             <td>kód</td>
             <td>znenie</td>
-            <td></td>
         </tr>
     </thead>
     <tbody>
@@ -63,19 +81,18 @@
 		<tr>
             <td>{item.code}</td>
             <td>{item.text}</td>
-            <td><a href="#"></a></td>
         </tr>
 {/each}
     </tbody>
-</table>
+</table> 
 <hr>
 <h2>typ aktivity</h2>
+<button type="button" style="background-color: cadetblue;" onclick={() => goto(UI_ADMIN_ENUM_ACTIVITY_TYPE.EDIT(), { invalidateAll: true})}>uprav číselník</button>
 <table>
     <thead>
         <tr>
             <td>kód</td>
             <td>znenie</td>
-            <td></td>
         </tr>
     </thead>
     <tbody>
@@ -83,7 +100,6 @@
 		<tr>
             <td>{item.code}</td>
             <td>{item.text}</td>
-            <td><a href="#"></a></td>
         </tr>
 {/each}
     </tbody>

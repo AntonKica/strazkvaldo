@@ -97,3 +97,8 @@ pub struct FinishedActivityModel {
 pub struct ReviewFinishedActivityModel {
     pub description: String,
 }
+#[derive(Debug, Deserialize, Serialize)]
+pub struct EnumUpdateModel {
+    pub code: String,
+    pub text: String,
+}

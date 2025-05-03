@@ -1,9 +1,10 @@
 use crate::application_enums::{AppUserRole, CriticalityType, EnumModelResponseTrait, Periodicity};
 use crate::model::{EnumModel, EnumModelResponse};
+use crate::schema::EnumUpdateModel;
 use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::web::Data;
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder};
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -34,15 +35,26 @@ pub fn filter_db_record(enum_model: &EnumModel) -> EnumModelResponse {
     }
 }
 
-pub fn get_enum_for(
+pub async fn get_enum_for(
     enum_type: EnumType,
     code: String,
     data: Data<Arc<AppState>>,
 ) -> Option<EnumModelResponse> {
-    data.enum_values
-        .iter()
-        .find(|e| e.name == enum_type_to_db_column(&enum_type) && e.code == code)
-        .map(|e| filter_db_record(&e))
+    match sqlx::query_as!(
+        EnumModel,
+        r#"SELECT * FROM enum_values where name = $1 and code =$2;"#,
+        enum_type_to_db_column(&enum_type),
+        code
+    )
+    .fetch_one(&data.db)
+    .await
+    {
+        Ok(enum_value) => Some(EnumModelResponse {
+            code: enum_value.code,
+            text: enum_value.text,
+        }),
+        Err(_) => None,
+    }
 }
 
 #[get("/enum/{name}")]
@@ -73,6 +85,65 @@ pub async fn get_enum(path: web::Path<String>, data: web::Data<Arc<AppState>>) -
         "enum_values":enum_response
     });
     HttpResponse::Ok().json(json_response)
+}
+
+#[post("/enum/{name}")]
+pub async fn post_enum(
+    path: web::Path<String>,
+    body: web::Json<Vec<EnumUpdateModel>>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let name = path.into_inner();
+    if enum_string_to_enum_type(&name).is_none() {
+        return HttpResponse::BadRequest()
+            .json(serde_json::json!({"status": "failed", "message": "Invalid enum name"}));
+    }
+
+    let mut tx = match data.db.begin().await {
+        Ok(tx) => tx,
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    };
+
+    match sqlx::query_as!(
+        enum_values,
+        "UPDATE enum_values SET _removed = true WHERE name = $1",
+        name
+    )
+    .execute(&mut *tx)
+    .await
+    {
+        Ok(_) => {}
+        Err(e) => return HttpResponse::InternalServerError().body(e.to_string()),
+    }
+
+    let query = r"
+            INSERT INTO enum_values
+             (
+                name,
+                code,
+                text,
+                _removed
+            ) SELECT * FROM UNNEST(
+                $1::CHAR(16)[],
+                $2::CHAR(16)[],
+                $3::CHAR(80)[],
+                $4::BOOLEAN[]
+            ) ON CONFLICT (code) DO UPDATE SET text=excluded.text, _removed = false";
+
+    match sqlx::query(query)
+        .bind(Vec::from_iter(vec![name.clone(); body.len()]))
+        .bind(body.iter().map(|e| e.code.clone()).collect::<Vec<String>>())
+        .bind(body.iter().map(|e| e.text.clone()).collect::<Vec<String>>())
+        .bind(Vec::from_iter(vec![false; body.len()]))
+        .fetch_all(&mut *tx)
+        .await
+    {
+        Ok(_) => match tx.commit().await {
+            Ok(_) => HttpResponse::Ok().json(serde_json::json!({ "status": "success", })),
+            Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+        },
+        Err(e) => HttpResponse::InternalServerError().body(e.to_string()),
+    }
 }
 
 pub fn get_enum_for_application_enum<T: FromStr + ToString + EnumModelResponseTrait>(

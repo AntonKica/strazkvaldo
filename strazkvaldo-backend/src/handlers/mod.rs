@@ -22,7 +22,8 @@ pub fn config(conf: &mut web::ServiceConfig) {
                 .service(handlers_user::get_app_user_list)
                 .service(handlers_user::post_app_user)
                 .service(handlers_user::patch_app_user)
-                .service(handlers_user::delete_user),
+                .service(handlers_user::delete_user)
+                .service(handlers_enum::post_enum),
         )
         .service(
             web::scope("/user")
