@@ -42,6 +42,7 @@ async fn filter_db_record(
             one_time_activity_model.activity_type.to_owned(),
             data.clone(),
         )
+        .await
         .unwrap(),
         criticality_type: get_enum_for_application_enum::<CriticalityType>(
             one_time_activity_model.criticality_type.clone(),

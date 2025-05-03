@@ -8,7 +8,6 @@ mod tests;
 use crate::handlers::handlers_activities::{
     auto_review_finished_activities_for_today, generate_finished_activities_for_today,
 };
-use crate::model::EnumModel;
 use actix_web::middleware::from_fn;
 use actix_web::web::scope;
 use actix_web::{middleware, web, App, HttpServer};
@@ -20,7 +19,6 @@ use tokio_cron_scheduler::{Job, JobScheduler};
 
 pub struct AppState {
     db: PgPool,
-    enum_values: Vec<EnumModel>,
 }
 
 #[derive(Clone, PartialEq)]
@@ -69,17 +67,9 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
-    let enum_values = sqlx::query_as!(EnumModel, r#"SELECT * FROM enum_values"#)
-        .fetch_all(&pool)
-        .await
-        .unwrap();
-
     let secret_key = actix_web::cookie::Key::generate();
 
-    let app_data = web::Data::new(AppState {
-        db: pool.clone(),
-        enum_values: enum_values.clone(),
-    });
+    let app_data = web::Data::new(AppState { db: pool.clone() });
     let cron_data = Arc::clone(&app_data);
 
     let sched = JobScheduler::new().await.unwrap();

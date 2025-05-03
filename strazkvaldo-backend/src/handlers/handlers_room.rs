@@ -5,6 +5,7 @@ use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use futures::future::join_all;
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -34,7 +35,10 @@ pub async fn get_simple_room(code: String, db: &PgPool) -> RoomSimpleModelRespon
         name: room.name,
     }
 }
-fn filter_db_record(room_model: &RoomModel, data: &web::Data<Arc<AppState>>) -> RoomModelResponse {
+async fn filter_db_record(
+    room_model: &RoomModel,
+    data: &web::Data<Arc<AppState>>,
+) -> RoomModelResponse {
     RoomModelResponse {
         code: room_model.code.to_owned(),
         name: room_model.name.to_owned(),
@@ -43,6 +47,7 @@ fn filter_db_record(room_model: &RoomModel, data: &web::Data<Arc<AppState>>) -> 
             room_model.room_type.to_owned(),
             data.clone(),
         )
+        .await
         .unwrap(),
         description: room_model.description.to_owned(),
     }
@@ -66,10 +71,12 @@ pub async fn get_room_list(
     .await
     .unwrap();
 
-    let room_response = rooms
-        .into_iter()
-        .map(|note| filter_db_record(&note, &data))
-        .collect::<Vec<RoomModelResponse>>();
+    let room_response = join_all(
+        rooms
+            .into_iter()
+            .map(async |note| filter_db_record(&note, &data).await),
+    )
+    .await;
 
     let json_response = serde_json::json!({
         "status": "success",
@@ -86,7 +93,7 @@ pub async fn get_room(path: web::Path<String>, data: web::Data<Arc<AppState>>) -
         .await
     {
         Ok(room) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "room":  filter_db_record(&room, &data), })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "room":  filter_db_record(&room, &data).await, })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {
