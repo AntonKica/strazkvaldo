@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-    import { base } from '$app/paths';
 	import type { PageProps } from './$types';
     import { SVC_ADMIN_APP_USER } from '$lib/serviceRoutes';
+    import { UI_ADMIN_APP_USER } from '$lib/uiRoutes';
 
 	let { data }: PageProps = $props();
 	
@@ -38,7 +38,7 @@
 	}
 	
 	const goto_view = () => {
-		goto(`${base}/admin/user/${data.user.code}/view`, { invalidateAll: true});
+		goto(UI_ADMIN_APP_USER.VIEW(data.user.code), { invalidateAll: true});
 	}
 </script>
 

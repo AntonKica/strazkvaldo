@@ -1,7 +1,8 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
-    import { UI_USER_REPEATED_ACTIVITY } from '$lib/uiRoutes';
+    import { UI_USER_REPEATED_ACTIVITY, delete_entity } from '$lib/uiRoutes';
+    import { SVC_USER_REPEATED_ACTIVITY } from '$lib/serviceRoutes';
     import { day_of_week_to_string } from '$lib/common';
 
 	let { data }: PageProps = $props();
@@ -24,4 +25,5 @@ denne
  {/if} <br>
 <b>popis</b> {repeated_activity.description} <br>
 <br>
-<button type="button" onclick={() => goto(UI_USER_REPEATED_ACTIVITY.EDIT(repeated_activity.code), { invalidateAll: true})}>Uprav jednorázovú aktivitu</button>
+<button type="button" onclick={() => goto(UI_USER_REPEATED_ACTIVITY.EDIT(repeated_activity.code), { invalidateAll: true})}>Uprav aktivitu</button>
+<button type="button" onclick={() => delete_entity(SVC_USER_REPEATED_ACTIVITY.DELETE(repeated_activity.code), UI_USER_REPEATED_ACTIVITY.LIST())} style="color: red;">Vymaž aktivitu</button>

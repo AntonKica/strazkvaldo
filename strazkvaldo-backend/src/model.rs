@@ -13,6 +13,7 @@ pub struct AppUserModel {
     pub app_user_role: String,
     pub created: DateTime<Utc>,
     pub updated: DateTime<Utc>,
+    pub _removed: bool,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AppUserModelResponse {
@@ -34,6 +35,7 @@ pub struct OneTimeActivityModel {
     pub duration_in_seconds: i32,
     pub description: String,
     pub due_date: NaiveDate,
+    pub _removed: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -56,6 +58,7 @@ pub struct RepeatedActivityModel {
     pub description: String,
     pub periodicity: String,
     pub periodicity_unit: i32,
+    pub _removed: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -76,6 +79,7 @@ pub struct RoomModel {
     pub name: String,
     pub room_type: String,
     pub description: String,
+    pub _removed: bool,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -90,6 +94,7 @@ pub struct EnumModel {
     pub name: String,
     pub code: String,
     pub text: String,
+    pub _removed: bool,
 }
 #[derive(Debug, Deserialize, Serialize)]
 pub struct EnumModelResponse {

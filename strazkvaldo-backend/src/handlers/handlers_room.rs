@@ -2,8 +2,8 @@ use crate::handlers::handlers_enum::{get_enum_for, EnumType};
 use crate::model::{RoomModel, RoomModelResponse};
 use crate::schema::{CreateRoom, FilterOptions, UpdateRoom};
 use crate::AppState;
-use actix_web::http;
 use actix_web::http::header::*;
+use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use std::sync::Arc;
 
@@ -31,7 +31,7 @@ pub async fn get_room_list(
 
     let one_time_activities: Vec<RoomModel> = sqlx::query_as!(
         RoomModel,
-        r#"SELECT * FROM room LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM room where _removed = false LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -90,7 +90,7 @@ pub async fn post_room(
 
     let query_result = sqlx::query_as!(
         RoomModel,
-        r#"INSERT INTO room (code,name,room_type,description) VALUES ($1,$2,$3,$4) returning *"#,
+        r#"INSERT INTO room (code,name,room_type,description,_removed) VALUES ($1,$2,$3,$4,false) returning *"#,
         next_code,
         body.name.to_owned(),
         body.room_type.to_owned(),
@@ -156,6 +156,32 @@ pub async fn patch_room(
             let message = format!("Error: {:?}", err);
             return HttpResponse::Ok()
                 .json(serde_json::json!({"status": "error","message": message}));
+        }
+    }
+}
+
+#[delete("/room/{code}")]
+pub async fn delete_room(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let query_result = sqlx::query_as!(
+        RoomModel,
+        "UPDATE room SET _removed = true WHERE code = $1 RETURNING *",
+        code,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match query_result {
+        Ok(note) => {
+            let note_response =
+                serde_json::json!({"status": "success","message": "successfully removed"});
+            HttpResponse::Ok().json(note_response)
+        }
+        Err(err) => {
+            let message = format!("failed to remove: {:?}", err);
+            HttpResponse::Ok().json(serde_json::json!({"status": "error","message": message}))
         }
     }
 }

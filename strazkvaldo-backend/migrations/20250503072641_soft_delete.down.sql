@@ -1,0 +1,10 @@
+ALTER TABLE enum_values
+    DROP COLUMN _removed;
+ALTER TABLE one_time_activity
+    DROP COLUMN _removed;
+ALTER TABLE repeated_activity
+    DROP COLUMN _removed;
+ALTER TABLE app_user
+    DROP COLUMN _removed;
+ALTER TABLE room
+    DROP COLUMN _removed;

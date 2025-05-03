@@ -3,8 +3,8 @@ use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum
 use crate::model::{OneTimeActivityModel, OneTimeActivityModelResponse};
 use crate::schema::{CreateOneTimeActivity, FilterOptions, UpdateOneTimeActivity};
 use crate::AppState;
-use actix_web::http;
 use actix_web::http::header::*;
+use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use std::sync::Arc;
 
@@ -41,7 +41,7 @@ pub async fn get_one_time_activity_list(
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where due_date >= CURRENT_DATE order by due_date desc LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM one_time_activity where _removed = false and due_date >= CURRENT_DATE order by due_date desc LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -51,7 +51,7 @@ pub async fn get_one_time_activity_list(
 
     let one_time_activities_expired: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where due_date < CURRENT_DATE order by due_date LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM one_time_activity where _removed = false and due_date < CURRENT_DATE order by due_date LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -122,7 +122,7 @@ pub async fn post_one_time_activity(
 
     let query_result = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"INSERT INTO one_time_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,due_date) VALUES ($1,$2,$3,$4,$5,$6,$7) returning *"#,
+        r#"INSERT INTO one_time_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,due_date,_removed) VALUES ($1,$2,$3,$4,$5,$6,$7,false) returning *"#,
         next_code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
@@ -200,6 +200,32 @@ pub async fn patch_one_time_activity(
             let message = format!("Error: {:?}", err);
             return HttpResponse::Ok()
                 .json(serde_json::json!({"status": "error","message": message}));
+        }
+    }
+}
+
+#[delete("/one-time-activity/{code}")]
+pub async fn delete_one_time_activity(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let query_result = sqlx::query_as!(
+        OneTimeActivityModel,
+        "UPDATE one_time_activity SET _removed = true WHERE code = $1 RETURNING *",
+        code,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match query_result {
+        Ok(note) => {
+            let note_response =
+                serde_json::json!({"status": "success","message": "successfully removed"});
+            HttpResponse::Ok().json(note_response)
+        }
+        Err(err) => {
+            let message = format!("failed to remove: {:?}", err);
+            HttpResponse::Ok().json(serde_json::json!({"status": "error","message": message}))
         }
     }
 }

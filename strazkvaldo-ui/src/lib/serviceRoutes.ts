@@ -25,6 +25,9 @@ class EntityRoute {
     PATCH(code: string): string {
         return `${this.basePath()}/${code}`;
     }
+    DELETE(code: string): string {
+        return `${this.basePath()}/${code}`;
+    }
     CUSTOM_CODE(custom: string, code: string) {
         return `${this.basePath()}/${code}/${custom}`;
     }

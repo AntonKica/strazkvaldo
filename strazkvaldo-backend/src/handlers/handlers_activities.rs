@@ -92,13 +92,7 @@ fn generate_occurences(
     }
 }
 #[get("/upcoming-activity")]
-pub async fn get_upcoming_activities(
-    data: web::Data<Arc<AppState>>,
-    opts: web::Query<FilterOptions>,
-) -> impl Responder {
-    //let limit = opts.limit.unwrap_or(10);
-    //let offset = (opts.page.unwrap_or(1) - 1) * limit;
-
+pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Responder {
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
         r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week' and due_date >= CURRENT_DATE"#

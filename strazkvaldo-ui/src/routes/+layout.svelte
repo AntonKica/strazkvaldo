@@ -3,7 +3,7 @@
     import { goto } from '$app/navigation';
     import { AppUserRole } from '$lib/common';
 	import { auth } from '$lib/userState.svelte';
-    import { UI_USER_RECENTLY_FINISHED_ACTIVITY, UI_USER_REVIEWED_FINISHED_ACTIVITY } from '$lib/uiRoutes';
+    import { UI_ADMIN_APP_USER, UI_USER_RECENTLY_FINISHED_ACTIVITY, UI_USER_REVIEWED_FINISHED_ACTIVITY } from '$lib/uiRoutes';
 
 	let { children } = $props();
 </script>
@@ -20,7 +20,7 @@
 	<li><a href="{base}/about">O aplikácií</a></li> |
 	{#if auth.userState.role == AppUserRole.Admin}
 	<li style="color:indianred">Admin</li> |
-	<li><a style="color:indianred" href="{base}/admin/user">Správa používateľov</a></li> |
+	<li><a style="color:indianred" href={UI_ADMIN_APP_USER.LIST()}>Správa používateľov</a></li> |
 	<li><a style="color:indianred" href="{base}/admin/enum">Správa číselníkov</a></li> |
 	|
 	{/if}
