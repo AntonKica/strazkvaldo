@@ -1,4 +1,6 @@
 use crate::application_enums::Periodicity;
+use crate::handlers::handlers_ota::get_simple_one_time_activity;
+use crate::handlers::handlers_ra::get_simple_repeated_activity;
 use crate::handlers::handlers_settings::query_app_settings;
 use crate::model::{
     FinishedActivityResponse, OneTimeActivityModel, RepeatedActivityModel, UpcomingActivity,
@@ -10,16 +12,29 @@ use actix_web::http::header::*;
 use actix_web::{get, patch, web, HttpResponse, Responder};
 use chrono::{Datelike, Local, Months, NaiveDate, TimeDelta, Utc};
 use cron::Schedule;
+use futures::future::join_all;
 use sqlx::PgPool;
 use std::ops::Add;
 use std::str::FromStr;
 use std::sync::Arc;
 
-fn filter_db_record(finished_activity_model: &FinishedActivityModel) -> FinishedActivityResponse {
+async fn filter_db_record(
+    finished_activity_model: &FinishedActivityModel,
+    db: &PgPool,
+) -> FinishedActivityResponse {
+    let repeated_activity = match finished_activity_model.repeated_activity_code.clone() {
+        Some(code) => Some(get_simple_repeated_activity(code, db).await),
+        None => None,
+    };
+    let one_time_activity = match finished_activity_model.one_time_activity_code.clone() {
+        Some(code) => Some(get_simple_one_time_activity(code, db).await),
+        None => None,
+    };
+
     FinishedActivityResponse {
         code: finished_activity_model.code.clone(),
-        repeated_activity_code: finished_activity_model.repeated_activity_code.clone(),
-        one_time_activity_code: finished_activity_model.one_time_activity_code.clone(),
+        repeated_activity,
+        one_time_activity,
         due_date: finished_activity_model.due_date.clone(),
         description: finished_activity_model.description.clone(),
     }
@@ -104,7 +119,6 @@ pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Res
     let mut upcoming_activities = one_time_activities
         .into_iter()
         .map(|ota| UpcomingActivity {
-            name: ota.name,
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
             due_date: ota.due_date,
@@ -125,7 +139,6 @@ pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Res
         .iter()
         .for_each(|ca| {
             upcoming_activities.push(UpcomingActivity {
-                name: ra.name.clone(),
                 repeated_activity_code: Option::from(ra.code.clone()),
                 one_time_activity_code: None::<String>,
                 due_date: ca.to_owned(),
@@ -134,15 +147,23 @@ pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Res
     });
 
     upcoming_activities.sort_by(|a, b| a.due_date.cmp(&b.due_date));
-    let res: Vec<UpcomingActivityResponse> = upcoming_activities
-        .iter()
-        .map(|a| UpcomingActivityResponse {
-            name: a.name.clone(),
-            repeated_activity_code: a.repeated_activity_code.clone(),
-            one_time_activity_code: a.one_time_activity_code.clone(),
+    let res = join_all(upcoming_activities.iter().map(async |a| {
+        let repeated_activity = match a.repeated_activity_code.clone() {
+            Some(code) => Some(get_simple_repeated_activity(code, &data.db).await),
+            None => None,
+        };
+        let one_time_activity = match a.one_time_activity_code.clone() {
+            Some(code) => Some(get_simple_one_time_activity(code, &data.db).await),
+            None => None,
+        };
+
+        UpcomingActivityResponse {
+            repeated_activity,
+            one_time_activity,
             due_date: a.due_date.format("%d.%m.%Y").to_string(),
-        })
-        .collect();
+        }
+    }))
+    .await;
 
     let json_response = serde_json::json!({
         "status": "success",
@@ -168,7 +189,6 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
             )[0];
             if next_occurence.eq(&Local::now().date_naive()) {
                 Some(UpcomingActivity {
-                    name: ra.name.clone(),
                     repeated_activity_code: Option::from(ra.code.clone()),
                     one_time_activity_code: None::<String>,
                     due_date: next_occurence,
@@ -190,7 +210,6 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
     let mut uas2: Vec<UpcomingActivity> = one_time_activities
         .iter()
         .map(|ota| UpcomingActivity {
-            name: ota.name.clone(),
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
             due_date: ota.due_date,
@@ -283,16 +302,26 @@ pub async fn get_recently_finished_activity_list(
     .await
     .unwrap();
 
-    let one_time_activities_response = one_time_activities
-        .into_iter()
-        .map(|note| FinishedActivityResponse {
-            code: note.code,
-            repeated_activity_code: note.repeated_activity_code,
-            one_time_activity_code: note.one_time_activity_code,
-            due_date: note.due_date,
-            description: note.description,
-        })
-        .collect::<Vec<FinishedActivityResponse>>();
+    let one_time_activities_response =
+        join_all(one_time_activities.into_iter().map(async |note| {
+            let repeated_activity = match note.repeated_activity_code.clone() {
+                Some(code) => Some(get_simple_repeated_activity(code, &data.db).await),
+                None => None,
+            };
+            let one_time_activity = match note.one_time_activity_code.clone() {
+                Some(code) => Some(get_simple_one_time_activity(code, &data.db).await),
+                None => None,
+            };
+
+            FinishedActivityResponse {
+                code: note.code,
+                repeated_activity,
+                one_time_activity,
+                due_date: note.due_date,
+                description: note.description,
+            }
+        }))
+        .await;
 
     let json_response = serde_json::json!({
         "status": "success",
@@ -320,13 +349,12 @@ pub async fn get_recently_finished_activity(
     .await
     {
         Ok(recently_finished_activity) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "recently_finished_activity": filter_db_record(&recently_finished_activity), })});
-            return HttpResponse::Ok().json(response);
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "recently_finished_activity": filter_db_record(&recently_finished_activity, &data.db).await, })});
+            HttpResponse::Ok().json(response)
         }
         Err(_) => {
             let message = format!("Recently finished activity with ID: {} not found", code);
-            return HttpResponse::Ok()
-                .json(serde_json::json!({"status": "failure","message": message}));
+            HttpResponse::Ok().json(serde_json::json!({"status": "failure","message": message}))
         }
     }
 }
@@ -392,10 +420,12 @@ pub async fn get_reviewed_finished_activity_list(
     .await
     .unwrap();
 
-    let one_time_activities_response = one_time_activities
-        .into_iter()
-        .map(|item| filter_db_record(&item))
-        .collect::<Vec<FinishedActivityResponse>>();
+    let one_time_activities_response = join_all(
+        one_time_activities
+            .into_iter()
+            .map(async |item| filter_db_record(&item, &data.db).await),
+    )
+    .await;
 
     let json_response = serde_json::json!({
         "status": "success",

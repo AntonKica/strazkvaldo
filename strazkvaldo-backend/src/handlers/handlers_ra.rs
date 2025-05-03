@@ -1,16 +1,38 @@
 use crate::application_enums::{CriticalityType, Periodicity};
 use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum, EnumType};
 use crate::handlers::handlers_room::get_simple_room;
-use crate::model::{RepeatedActivityModel, RepeatedActivityModelResponse};
+use crate::model::{
+    OneTimeActivityModel, OneTimeActivitySimpleModelResponse, RepeatedActivityModel,
+    RepeatedActivityModelResponse, RepeatedActivitySimpleModelResponse,
+};
 use crate::schema::{CreateRepeatedActivity, FilterOptions, UpdateRepeatedActivity};
 use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use futures::future::join_all;
+use sqlx::PgPool;
 use std::str::FromStr;
 use std::sync::Arc;
 
+pub async fn get_simple_repeated_activity(
+    code: String,
+    db: &PgPool,
+) -> RepeatedActivitySimpleModelResponse {
+    let activity: RepeatedActivityModel = sqlx::query_as!(
+        RepeatedActivityModel,
+        r#"SELECT * FROM repeated_activity where code = $1"#,
+        code
+    )
+    .fetch_one(db)
+    .await
+    .unwrap();
+
+    RepeatedActivitySimpleModelResponse {
+        code: activity.code,
+        name: activity.name,
+    }
+}
 async fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
     data: &web::Data<Arc<AppState>>,
