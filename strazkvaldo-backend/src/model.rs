@@ -33,6 +33,7 @@ pub struct OneTimeActivityModel {
     pub activity_type: String,
     pub criticality_type: String,
     pub duration_in_seconds: i32,
+    pub room_code: String,
     pub description: String,
     pub due_date: NaiveDate,
     pub _removed: bool,
@@ -45,6 +46,7 @@ pub struct OneTimeActivityModelResponse {
     pub activity_type: EnumModelResponse,
     pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
+    pub room: RoomSimpleModelResponse,
     pub description: String,
     pub due_date: NaiveDate,
 }
@@ -55,6 +57,7 @@ pub struct RepeatedActivityModel {
     pub activity_type: String,
     pub criticality_type: String,
     pub duration_in_seconds: i32,
+    pub room_code: String,
     pub description: String,
     pub periodicity: String,
     pub periodicity_unit: i32,
@@ -68,6 +71,7 @@ pub struct RepeatedActivityModelResponse {
     pub activity_type: EnumModelResponse,
     pub criticality_type: EnumModelResponse,
     pub duration_in_seconds: i32,
+    pub room: RoomSimpleModelResponse,
     pub description: String,
     pub periodicity: EnumModelResponse,
     pub periodicity_unit: i32,
@@ -88,6 +92,12 @@ pub struct RoomModelResponse {
     pub name: String,
     pub room_type: EnumModelResponse,
     pub description: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RoomSimpleModelResponse {
+    pub code: String,
+    pub name: String,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct EnumModel {

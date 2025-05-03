@@ -9,6 +9,7 @@
 	const one_time_activity = data.one_time_activity;
 	const activity_types = data.activity_types;
 	const criticality_types = data.criticality_types;
+	const rooms = data.rooms;
 
     const handleSubmit = async (event: SubmitEvent) => {
         event.preventDefault();
@@ -58,6 +59,13 @@
         <select name="criticality_type" value={one_time_activity.criticality_type.code}>
 			{#each criticality_types as criticality_type}
 				<option value={criticality_type.code}>{criticality_type.text}</option>
+			{/each}
+        </select>
+	 </label> <br>
+    <label> mietnosť 
+        <select name="room_code" value={one_time_activity.room.code}>
+			{#each rooms as room}
+				<option value={room.code}>{room.name}</option>
 			{/each}
         </select>
 	 </label> <br>

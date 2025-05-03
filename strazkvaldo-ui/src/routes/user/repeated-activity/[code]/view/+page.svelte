@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
 	import { goto } from '$app/navigation';
-    import { UI_USER_REPEATED_ACTIVITY, delete_entity } from '$lib/uiRoutes';
+    import { UI_USER_REPEATED_ACTIVITY, UI_USER_ROOM, delete_entity } from '$lib/uiRoutes';
     import { SVC_USER_REPEATED_ACTIVITY } from '$lib/serviceRoutes';
     import { day_of_week_to_string, duration_in_seconds_to_string } from '$lib/common';
 
@@ -13,6 +13,7 @@
 <b>názov</b> {repeated_activity.name} <br>
 <b>typ</b> {repeated_activity.activity_type.text} <br>
 <b>kritickosť</b> {repeated_activity.criticality_type.text} <br>
+<b>miestnosť</b> <a href={UI_USER_ROOM.VIEW(repeated_activity.room.code)}>{repeated_activity.room.name}</a> <br>
 <b>trvanie</b> {duration_in_seconds_to_string(repeated_activity.duration_in_seconds)} <br>
 <b>opakovanie</b> 
 {#if repeated_activity.periodicity.code ==="Day" }

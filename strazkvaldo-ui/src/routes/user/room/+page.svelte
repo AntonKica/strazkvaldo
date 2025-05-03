@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-    import { base } from '$app/paths';
     import { UI_USER_ROOM } from '$lib/uiRoutes';
 
 	let { data }: PageProps = $props();

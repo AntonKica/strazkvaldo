@@ -1,6 +1,6 @@
 <script lang="ts">
     import { duration_in_seconds_to_string, day_of_week_to_string } from '$lib/common';
-    import { UI_USER_REPEATED_ACTIVITY } from '$lib/uiRoutes';
+    import { UI_USER_REPEATED_ACTIVITY, UI_USER_ROOM } from '$lib/uiRoutes';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -16,6 +16,7 @@
             <td>Názov</td>
             <td>Typ aktivity</td>
             <td>Kritickosť</td>
+            <td>Miestnosť</td>
             <td>Trvanie</td>
             <td>Opakovanie</td>
             <td>Kedy</td>
@@ -28,6 +29,7 @@
             <td>{repeated_activity.name}</td>
             <td>{repeated_activity.activity_type.text}</td>
             <td>{repeated_activity.criticality_type.text}</td>
+            <td><a href={UI_USER_ROOM.VIEW(repeated_activity.room.code)}>{repeated_activity.room.name}</a></td>
             <td>{duration_in_seconds_to_string(repeated_activity.duration_in_seconds)}</td>
             <td>{repeated_activity.periodicity.text}</td>
             <td>

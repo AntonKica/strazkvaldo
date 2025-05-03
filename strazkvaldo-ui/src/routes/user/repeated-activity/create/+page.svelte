@@ -9,6 +9,7 @@
 	const activity_types = data.activity_types;
 	const criticality_types = data.criticality_types;
 	const periodicity = data.periodicity;
+	const rooms = data.rooms;
 	let selected_periodicity = $state(periodicity[0]);
     
     const handleSubmit = async (event: SubmitEvent) => {
@@ -52,6 +53,13 @@
         <select name="criticality_type">
 			{#each criticality_types as criticality_type}
 				<option value={criticality_type.code}>{criticality_type.text}</option>
+			{/each}
+        </select>
+	 </label> <br>
+    <label> mietnosť 
+        <select name="room_code">
+			{#each rooms as room}
+				<option value={room.code}>{room.name}</option>
 			{/each}
         </select>
 	 </label> <br>

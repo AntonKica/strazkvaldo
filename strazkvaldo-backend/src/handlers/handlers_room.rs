@@ -1,12 +1,39 @@
 use crate::handlers::handlers_enum::{get_enum_for, EnumType};
-use crate::model::{RoomModel, RoomModelResponse};
+use crate::model::{RoomModel, RoomModelResponse, RoomSimpleModelResponse};
 use crate::schema::{CreateRoom, FilterOptions, UpdateRoom};
 use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use sqlx::PgPool;
 use std::sync::Arc;
 
+pub async fn get_simple_rooms(db: &PgPool) -> Vec<RoomSimpleModelResponse> {
+    let rooms: Vec<RoomModel> =
+        sqlx::query_as!(RoomModel, r#"SELECT * FROM room where _removed = false"#)
+            .fetch_all(db)
+            .await
+            .unwrap();
+
+    rooms
+        .into_iter()
+        .map(|room_model: RoomModel| RoomSimpleModelResponse {
+            code: room_model.code,
+            name: room_model.name,
+        })
+        .collect::<Vec<RoomSimpleModelResponse>>()
+}
+pub async fn get_simple_room(code: String, db: &PgPool) -> RoomSimpleModelResponse {
+    let room: RoomModel = sqlx::query_as!(RoomModel, r#"SELECT * FROM room where code = $1"#, code)
+        .fetch_one(db)
+        .await
+        .unwrap();
+
+    RoomSimpleModelResponse {
+        code: room.code,
+        name: room.name,
+    }
+}
 fn filter_db_record(room_model: &RoomModel, data: &web::Data<Arc<AppState>>) -> RoomModelResponse {
     RoomModelResponse {
         code: room_model.code.to_owned(),
@@ -26,10 +53,10 @@ pub async fn get_room_list(
     data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
+    let limit = opts.limit.unwrap_or(100);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    let one_time_activities: Vec<RoomModel> = sqlx::query_as!(
+    let rooms: Vec<RoomModel> = sqlx::query_as!(
         RoomModel,
         r#"SELECT * FROM room where _removed = false LIMIT $1 OFFSET $2"#,
         limit as i64,
@@ -39,7 +66,7 @@ pub async fn get_room_list(
     .await
     .unwrap();
 
-    let room_response = one_time_activities
+    let room_response = rooms
         .into_iter()
         .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<RoomModelResponse>>();

@@ -1,15 +1,17 @@
 use crate::application_enums::{CriticalityType, Periodicity};
 use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum, EnumType};
+use crate::handlers::handlers_room::get_simple_room;
 use crate::model::{RepeatedActivityModel, RepeatedActivityModelResponse};
 use crate::schema::{CreateRepeatedActivity, FilterOptions, UpdateRepeatedActivity};
 use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use futures::future::join_all;
 use std::str::FromStr;
 use std::sync::Arc;
 
-fn filter_db_record(
+async fn filter_db_record(
     repeated_activity_model: &RepeatedActivityModel,
     data: &web::Data<Arc<AppState>>,
 ) -> RepeatedActivityModelResponse {
@@ -27,6 +29,7 @@ fn filter_db_record(
         )
         .unwrap(),
         duration_in_seconds: repeated_activity_model.duration_in_seconds.to_owned(),
+        room: get_simple_room(repeated_activity_model.room_code.clone(), &data.db).await,
         periodicity: get_enum_for_application_enum::<Periodicity>(
             repeated_activity_model.periodicity.clone(),
         )
@@ -54,10 +57,12 @@ pub async fn get_repeated_activity_list(
     .await
     .unwrap();
 
-    let repeated_activities_response = repeated_activities
-        .into_iter()
-        .map(|note| filter_db_record(&note, &data))
-        .collect::<Vec<RepeatedActivityModelResponse>>();
+    let repeated_activities_response = join_all(
+        repeated_activities
+            .into_iter()
+            .map(async |note| filter_db_record(&note, &data).await),
+    )
+    .await;
 
     let json_response = serde_json::json!({
         "status": "success",
@@ -81,13 +86,12 @@ pub async fn get_repeated_activity(
     .await
     {
         Ok(repeated_activity) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "repeated_activity": filter_db_record(&repeated_activity, &data), })});
-            return HttpResponse::Ok().json(response);
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "repeated_activity": filter_db_record(&repeated_activity, &data).await, })});
+            HttpResponse::Ok().json(response)
         }
         Err(_) => {
             let message = format!("Repeated activity with ID: {} not found", code);
-            return HttpResponse::Ok()
-                .json(serde_json::json!({"status": "failure","message": message}));
+            HttpResponse::Ok().json(serde_json::json!({"status": "failure","message": message}))
         }
     }
 }
@@ -147,11 +151,12 @@ pub async fn post_repeated_activity(
 
     let query_result = sqlx::query_as!(
         RepeatedActivityModel,
-        r#"INSERT INTO repeated_activity (code,name,activity_type,criticality_type,duration_in_seconds,description,periodicity,periodicity_unit,_removed) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,false) returning *"#,
+        r#"INSERT INTO repeated_activity (code,name,activity_type,criticality_type,room_code,duration_in_seconds,description,periodicity,periodicity_unit,_removed) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,false) returning *"#,
         next_code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
         body.criticality_type.to_owned(),
+        body.room_code.to_owned(),
         body.duration_in_seconds.to_owned(),
         body.description.to_owned(),
         body.periodicity.to_owned(),
@@ -210,12 +215,13 @@ pub async fn patch_repeated_activity(
 
     let query_result = sqlx::query_as!(
         RepeatedActivityModel,
-        "UPDATE repeated_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, description = $6, periodicity = $7, periodicity_unit = $8 WHERE code = $1 RETURNING *",
+        "UPDATE repeated_activity SET name = $2, activity_type = $3, criticality_type = $4, duration_in_seconds = $5, room_code = $6, description = $7, periodicity = $8, periodicity_unit = $9 WHERE code = $1 RETURNING *",
         code,
         body.name.to_owned(),
         body.activity_type.to_owned(),
         body.criticality_type.to_owned(),
         body.duration_in_seconds.to_owned(),
+        body.room_code.to_owned(),
         body.description.to_owned(),
         body.periodicity.to_owned(),
         body.periodicity_unit.to_owned(),
