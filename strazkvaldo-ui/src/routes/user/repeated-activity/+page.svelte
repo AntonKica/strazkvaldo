@@ -23,7 +23,7 @@
         </tr>
     </thead>
     <tbody>
-{#each data.repeated_activities as repeated_activity}
+{#each repeated_activities as repeated_activity}
 		<tr>
             <td>{repeated_activity.name}</td>
             <td>{repeated_activity.activity_type.text}</td>

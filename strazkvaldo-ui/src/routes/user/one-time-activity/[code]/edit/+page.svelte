@@ -3,7 +3,7 @@
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
     import { SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds, to_hours, to_html_date, to_minutes } from '$lib/common';
+    import { to_duration_in_seconds, to_hours, to_minutes } from '$lib/common';
 
 	let { data }: PageProps = $props();
 	const one_time_activity = data.one_time_activity;

@@ -3,7 +3,7 @@
     import { goto } from '$app/navigation';
     import { AppUserRole } from '$lib/common';
 	import { auth } from '$lib/userState.svelte';
-    import { UI_ADMIN_APP_USER, UI_USER_RECENTLY_FINISHED_ACTIVITY, UI_USER_REVIEWED_FINISHED_ACTIVITY } from '$lib/uiRoutes';
+    import { UI_ADMIN_APP_USER, UI_ADMIN_ENUM, UI_USER_ONE_TIME_ACTIVITY, UI_USER_RECENTLY_FINISHED_ACTIVITY, UI_USER_REPEATED_ACTIVITY, UI_USER_REVIEWED_FINISHED_ACTIVITY, UI_USER_ROOM, UI_USER_SETTINGS, UI_USER_UPCOMING_ACTIVITY } from '$lib/uiRoutes';
 
 	let { children } = $props();
 </script>
@@ -21,19 +21,18 @@
 	{#if auth.userState.role == AppUserRole.Admin}
 	<li style="color:indianred">Admin</li> |
 	<li><a style="color:indianred" href={UI_ADMIN_APP_USER.LIST()}>Správa používateľov</a></li> |
-	<li><a style="color:indianred" href="{base}/admin/enum">Správa číselníkov</a></li> |
+	<li><a style="color:indianred" href={UI_ADMIN_ENUM}>Správa číselníkov</a></li> |
 	|
 	{/if}
 	{#if auth.userState.role == AppUserRole.User}
 	<li style="color:#117a65">Užívateľ</li> |
-	<li><a style="color:#117a65" href="{base}/user/room">Správa miestnosti</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/one-time-activity">Správa jednorázových aktivít</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/repeated-activity">Správa opakovaných aktivít</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/upcoming-activities">Najbližšie aktivity</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_ROOM.LIST()}>Správa miestnosti</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_ONE_TIME_ACTIVITY.LIST()}>Správa jednorázových aktivít</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_REPEATED_ACTIVITY.LIST()}>Správa opakovaných aktivít</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_UPCOMING_ACTIVITY}>Najbližšie aktivity</a></li> |
 	<li><a style="color:#117a65" href={UI_USER_RECENTLY_FINISHED_ACTIVITY.LIST()}>Dokončené aktivity na uzavretie</a></li> |
 	<li><a style="color:#117a65" href={UI_USER_REVIEWED_FINISHED_ACTIVITY.LIST()}>Dokončené aktivity</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/notifications">Notifikácie</a></li> |
-	<li><a style="color:#117a65" href="{base}/user/settings">Nastavenia</a></li> |
+	<li><a style="color:#117a65" href={UI_USER_SETTINGS}>Nastavenia</a></li> |
 	{/if}
 	
 	{#if auth.userState.role == AppUserRole.Unsigned}

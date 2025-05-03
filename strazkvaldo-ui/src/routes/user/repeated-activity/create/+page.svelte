@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { PageProps } from './$types';
-    import { base } from '$app/paths';
     import { goto } from '$app/navigation';
     import { SVC_USER_REPEATED_ACTIVITY } from '$lib/serviceRoutes';
     import { to_duration_in_seconds } from '$lib/common';

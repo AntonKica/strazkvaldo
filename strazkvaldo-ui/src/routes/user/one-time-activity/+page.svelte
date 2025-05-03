@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { base } from '$app/paths';
     import { duration_in_seconds_to_string } from '$lib/common';
+    import { UI_USER_ONE_TIME_ACTIVITY } from '$lib/uiRoutes';
 	import type { PageProps } from './$types';
 
 	let { data }: PageProps = $props();
@@ -8,7 +8,7 @@
 
 <h1>Jednorázové aktivity</h1>
 
-<a href="{base}/user/one-time-activity/create">Vytvor novú jednorázovú aktivitu &#x2795</a>
+<a href={UI_USER_ONE_TIME_ACTIVITY.CREATE()}>Vytvor novú jednorázovú aktivitu &#x2795</a>
 <table>
     <thead>
         <tr>
@@ -30,7 +30,7 @@
             <td>{one_time_activity.criticality_type.text}</td>
             <td>{duration_in_seconds_to_string(one_time_activity.duration_in_seconds)}</td>
             <td>{one_time_activity.due_date}</td>
-            <td><a href="{base}/user/one-time-activity/{one_time_activity.code}/view/">pozri</a></td>
+            <td><a href={UI_USER_ONE_TIME_ACTIVITY.VIEW(one_time_activity.code)}>pozri</a></td>
         </tr>
 {/each}
     </tbody>
@@ -58,7 +58,7 @@
             <td>{one_time_activity.criticality_type.text}</td>
             <td>{duration_in_seconds_to_string(one_time_activity.duration_in_seconds)}</td>
             <td>{one_time_activity.due_date}</td>
-            <td><a href="{base}/user/one-time-activity/{one_time_activity.code}/view/">pozri</a></td>
+            <td><a href={UI_USER_ONE_TIME_ACTIVITY.VIEW(one_time_activity.code)}>pozri</a></td>
         </tr>
 {/each}
     </tbody>

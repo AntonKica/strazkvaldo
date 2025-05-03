@@ -2,7 +2,7 @@ import type { PageLoad } from './$types';
 import { SVC_ENUM_APP_USER_ROLE, SVC_ENUM_CRITICALITY_TYPE, SVC_ENUM_ROOM_TYPE, SVC_ENUM_ACTIVITY_TYPE } from '$lib/serviceRoutes'
 
 
-export const load: PageLoad = async ({ params }) => {
+export const load: PageLoad = async ({ fetch }) => {
     let app_user_role = await fetch(SVC_ENUM_APP_USER_ROLE.LIST()).then(response => {
         return response.json();
     });
