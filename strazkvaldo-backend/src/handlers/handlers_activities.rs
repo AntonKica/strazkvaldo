@@ -95,7 +95,7 @@ fn generate_occurences(
 pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Responder {
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week' and due_date >= CURRENT_DATE"#
+        r#"SELECT * FROM one_time_activity where _removed = false and due_date <= CURRENT_DATE + interval '1 week' and due_date >= CURRENT_DATE"#
     )
     .fetch_all(&data.db)
     .await
