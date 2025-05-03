@@ -1,4 +1,4 @@
-use chrono::{DateTime, NaiveDate, Utc};
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Debug)]
@@ -13,9 +13,9 @@ pub struct CreateOneTimeActivity {
     pub activity_type: String,
     pub criticality_type: String,
     pub duration_in_seconds: i32,
-    //#[serde(skip_serializing_if = "Option::is_none")]
+    pub room_code: String,
     pub description: String,
-    pub date: DateTime<Utc>,
+    pub due_date: NaiveDate,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -24,8 +24,9 @@ pub struct UpdateOneTimeActivity {
     pub activity_type: String,
     pub criticality_type: String,
     pub duration_in_seconds: i32,
+    pub room_code: String,
     pub description: String,
-    pub date: DateTime<Utc>,
+    pub due_date: NaiveDate,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateRepeatedActivity {
@@ -34,6 +35,7 @@ pub struct CreateRepeatedActivity {
     pub criticality_type: String,
     pub duration_in_seconds: i32,
     //#[serde(skip_serializing_if = "Option::is_none")]
+    pub room_code: String,
     pub description: String,
     pub periodicity: String,
     pub periodicity_unit: i32,
@@ -45,6 +47,7 @@ pub struct UpdateRepeatedActivity {
     pub activity_type: String,
     pub criticality_type: String,
     pub duration_in_seconds: i32,
+    pub room_code: String,
     pub description: String,
     pub periodicity: String,
     pub periodicity_unit: i32,
@@ -91,6 +94,6 @@ pub struct FinishedActivityModel {
 }
 
 #[derive(Debug, Deserialize, Serialize)]
-pub struct FinishedActivityUpdateModel {
+pub struct ReviewFinishedActivityModel {
     pub description: String,
 }

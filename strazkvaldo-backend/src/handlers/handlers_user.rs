@@ -3,17 +3,14 @@ use crate::handlers::handlers_enum::get_enum_for_application_enum;
 use crate::model::{AppUserModel, AppUserModelResponse};
 use crate::schema::{CreateAppUser, FilterOptions, UpdateAppUser};
 use crate::AppState;
-use actix_web::http;
 use actix_web::http::header::*;
+use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
 use chrono::Utc;
 use sha2::{Digest, Sha512};
 use std::sync::Arc;
 
-pub fn filter_db_record(
-    app_user_model: &AppUserModel,
-    data: &web::Data<Arc<AppState>>,
-) -> AppUserModelResponse {
+pub fn filter_db_record(app_user_model: &AppUserModel) -> AppUserModelResponse {
     AppUserModelResponse {
         code: app_user_model.code.to_owned(),
         first_name: app_user_model.first_name.to_owned(),
@@ -24,16 +21,8 @@ pub fn filter_db_record(
             app_user_model.app_user_role.clone(),
         )
         .unwrap(),
-        created: app_user_model
-            .created
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
-        updated: app_user_model
-            .updated
-            .format("%d.%m.%Y %H:%M:%S")
-            .to_string()
-            .to_owned(),
+        created: app_user_model.created,
+        updated: app_user_model.updated,
     }
 }
 
@@ -47,7 +36,7 @@ pub async fn get_app_user_list(
 
     let app_user_models: Vec<AppUserModel> = sqlx::query_as!(
         AppUserModel,
-        r#"SELECT * FROM app_user LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM app_user where _removed = false LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -57,7 +46,7 @@ pub async fn get_app_user_list(
 
     let app_users_response = app_user_models
         .into_iter()
-        .map(|note| filter_db_record(&note, &data))
+        .map(|note| filter_db_record(&note))
         .collect::<Vec<AppUserModelResponse>>();
 
     let json_response = serde_json::json!({
@@ -78,7 +67,7 @@ pub async fn get_app_user(
         .await
     {
         Ok(user) => {
-            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "user": filter_db_record(&user, &data), })});
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "user": filter_db_record(&user), })});
             return HttpResponse::Ok().json(response);
         }
         Err(_) => {
@@ -108,15 +97,19 @@ pub async fn post_app_user(
         .unwrap();
     let next_code = format!("USR-{:04}", top_code_number + 1);
 
+    let mut hasher = Sha512::new();
+    hasher.update(body.password.as_bytes());
+    let password_hash = hex::encode(hasher.finalize().to_vec());
+
     let query_result = sqlx::query_as!(
         AppUserModel,
-        r#"INSERT INTO app_user (code,first_name,last_name,email,username,password_hash,app_user_role,created,updated) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) returning *"#,
+        r#"INSERT INTO app_user (code,first_name,last_name,email,username,password_hash,app_user_role,created,updated,_removed) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,false) returning *"#,
         next_code,
         body.first_name.to_owned(),
         body.last_name.to_owned(),
         body.email.to_owned(),
         body.username.to_owned(),
-        body.password.to_owned(),
+        password_hash.to_owned(),
         body.app_user_role.to_owned(),
         Utc::now(),
         Utc::now(),
@@ -194,7 +187,7 @@ pub async fn patch_app_user(
     match query_result {
         Ok(app_user) => {
             let response_body = serde_json::json!({"status": "success","data": serde_json::json!({
-                "user": filter_db_record(&app_user, &data)
+                "user": filter_db_record(&app_user)
             })});
 
             return HttpResponse::Ok().json(response_body);
@@ -203,6 +196,32 @@ pub async fn patch_app_user(
             let message = format!("Error: {:?}", err);
             return HttpResponse::Ok()
                 .json(serde_json::json!({"status": "error","message": message}));
+        }
+    }
+}
+
+#[delete("/app-user/{code}")]
+pub async fn delete_user(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let query_result = sqlx::query_as!(
+        AppUserModel,
+        "UPDATE app_user SET _removed = true WHERE code = $1 RETURNING *",
+        code,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match query_result {
+        Ok(note) => {
+            let note_response =
+                serde_json::json!({"status": "success","message": "successfully removed"});
+            HttpResponse::Ok().json(note_response)
+        }
+        Err(err) => {
+            let message = format!("failed to remove: {:?}", err);
+            HttpResponse::Ok().json(serde_json::json!({"status": "error","message": message}))
         }
     }
 }

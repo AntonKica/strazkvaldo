@@ -1,12 +1,39 @@
 use crate::handlers::handlers_enum::{get_enum_for, EnumType};
-use crate::model::{RoomModel, RoomModelResponse};
+use crate::model::{RoomModel, RoomModelResponse, RoomSimpleModelResponse};
 use crate::schema::{CreateRoom, FilterOptions, UpdateRoom};
 use crate::AppState;
-use actix_web::http;
 use actix_web::http::header::*;
+use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use sqlx::PgPool;
 use std::sync::Arc;
 
+pub async fn get_simple_rooms(db: &PgPool) -> Vec<RoomSimpleModelResponse> {
+    let rooms: Vec<RoomModel> =
+        sqlx::query_as!(RoomModel, r#"SELECT * FROM room where _removed = false"#)
+            .fetch_all(db)
+            .await
+            .unwrap();
+
+    rooms
+        .into_iter()
+        .map(|room_model: RoomModel| RoomSimpleModelResponse {
+            code: room_model.code,
+            name: room_model.name,
+        })
+        .collect::<Vec<RoomSimpleModelResponse>>()
+}
+pub async fn get_simple_room(code: String, db: &PgPool) -> RoomSimpleModelResponse {
+    let room: RoomModel = sqlx::query_as!(RoomModel, r#"SELECT * FROM room where code = $1"#, code)
+        .fetch_one(db)
+        .await
+        .unwrap();
+
+    RoomSimpleModelResponse {
+        code: room.code,
+        name: room.name,
+    }
+}
 fn filter_db_record(room_model: &RoomModel, data: &web::Data<Arc<AppState>>) -> RoomModelResponse {
     RoomModelResponse {
         code: room_model.code.to_owned(),
@@ -26,12 +53,12 @@ pub async fn get_room_list(
     data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
-    let limit = opts.limit.unwrap_or(10);
+    let limit = opts.limit.unwrap_or(100);
     let offset = (opts.page.unwrap_or(1) - 1) * limit;
 
-    let one_time_activities: Vec<RoomModel> = sqlx::query_as!(
+    let rooms: Vec<RoomModel> = sqlx::query_as!(
         RoomModel,
-        r#"SELECT * FROM room LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM room where _removed = false LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -39,7 +66,7 @@ pub async fn get_room_list(
     .await
     .unwrap();
 
-    let room_response = one_time_activities
+    let room_response = rooms
         .into_iter()
         .map(|note| filter_db_record(&note, &data))
         .collect::<Vec<RoomModelResponse>>();
@@ -90,7 +117,7 @@ pub async fn post_room(
 
     let query_result = sqlx::query_as!(
         RoomModel,
-        r#"INSERT INTO room (code,name,room_type,description) VALUES ($1,$2,$3,$4) returning *"#,
+        r#"INSERT INTO room (code,name,room_type,description,_removed) VALUES ($1,$2,$3,$4,false) returning *"#,
         next_code,
         body.name.to_owned(),
         body.room_type.to_owned(),
@@ -156,6 +183,32 @@ pub async fn patch_room(
             let message = format!("Error: {:?}", err);
             return HttpResponse::Ok()
                 .json(serde_json::json!({"status": "error","message": message}));
+        }
+    }
+}
+
+#[delete("/room/{code}")]
+pub async fn delete_room(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let query_result = sqlx::query_as!(
+        RoomModel,
+        "UPDATE room SET _removed = true WHERE code = $1 RETURNING *",
+        code,
+    )
+    .fetch_one(&data.db)
+    .await;
+    match query_result {
+        Ok(note) => {
+            let note_response =
+                serde_json::json!({"status": "success","message": "successfully removed"});
+            HttpResponse::Ok().json(note_response)
+        }
+        Err(err) => {
+            let message = format!("failed to remove: {:?}", err);
+            HttpResponse::Ok().json(serde_json::json!({"status": "error","message": message}))
         }
     }
 }

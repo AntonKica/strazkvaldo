@@ -3,12 +3,13 @@
     import { base } from '$app/paths';
 	import type { PageProps } from './$types';
     import { SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds, to_hours, to_html_date, to_minutes } from '$lib/common';
+    import { to_duration_in_seconds, to_hours, to_minutes } from '$lib/common';
 
 	let { data }: PageProps = $props();
 	const one_time_activity = data.one_time_activity;
 	const activity_types = data.activity_types;
 	const criticality_types = data.criticality_types;
+	const rooms = data.rooms;
 
     const handleSubmit = async (event: SubmitEvent) => {
         event.preventDefault();
@@ -19,7 +20,6 @@
 
         const formatted_data = {
 			...formEntries,
-			date: from_html_date(formEntries.date),
 			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours))
         };
 		
@@ -62,7 +62,14 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label>dátum <input type="date" name="date" value={to_html_date(one_time_activity.date)}></label> <br>
+    <label> mietnosť 
+        <select name="room_code" value={one_time_activity.room.code}>
+			{#each rooms as room}
+				<option value={room.code}>{room.name}</option>
+			{/each}
+        </select>
+	 </label> <br>
+	<label>dátum <input type="date" name="due_date" value={one_time_activity.due_date}></label> <br>
 	<label>trvanie 
 		<input type="number" name="duration_hours" min="0" max="24" step="1" value={to_hours(one_time_activity.duration_in_seconds)}> hodín
 		<input type="number" name="duration_minutes" min="0" max="60" step="1" value={to_minutes(one_time_activity.duration_in_seconds)}> minút

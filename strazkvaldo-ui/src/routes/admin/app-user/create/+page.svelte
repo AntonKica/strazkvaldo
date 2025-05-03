@@ -3,9 +3,10 @@
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
     import { SVC_ADMIN_APP_USER } from '$lib/serviceRoutes';
+    import { UI_ADMIN_APP_USER } from '$lib/uiRoutes';
     
 	let { data }: PageProps = $props();
-    console.log(data);
+    let app_user_role = data.app_user_role;
     
     const handleSubmit = async (event: SubmitEvent) => {
         event.preventDefault();
@@ -24,7 +25,7 @@
 			body:JSON.stringify(formatted_data)
 		}).then((response) => {
             if(response.ok) {
-                goto(`${base}/admin/user/${response.headers.get('location')}/view`)
+                goto(UI_ADMIN_APP_USER.VIEW(response.headers.get('location') ?? ""));
             } else {
                 alert("Failed to create user")
             }
@@ -39,9 +40,10 @@
 	<label> používateľské meno <input name="username" type="text"> </label>
 	<label> heslo <input name="password" type="password"> </label> <br>
     <label> rola
-        <select name="app_user_role">
-            <option value=0>administrátor</option>
-            <option value=1>používateľ</option>
+        <select name="app_user_role" value={app_user_role.code}>
+			{#each data.app_user_role as role}
+				<option value={role.code}>{role.text}</option>
+			{/each}
         </select>
 	 </label> <br><br>
 	<button type="submit">Vytvor použivateľa</button>

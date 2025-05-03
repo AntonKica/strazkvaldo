@@ -5,7 +5,9 @@ mod model;
 mod schema;
 mod tests;
 
-use crate::handlers::handlers_activities::generate_finished_activities_for_today;
+use crate::handlers::handlers_activities::{
+    auto_review_finished_activities_for_today, generate_finished_activities_for_today,
+};
 use crate::model::EnumModel;
 use actix_web::middleware::from_fn;
 use actix_web::web::scope;
@@ -83,12 +85,21 @@ async fn main() -> std::io::Result<()> {
     let sched = JobScheduler::new().await.unwrap();
 
     // Add cron job with access to the data
-    let job = Job::new("0 0 1 * * *", move |_uuid, _l| {
+    let job = Job::new("0 0 0 * * *", move |_uuid, _l| {
         let data = Arc::clone(&cron_data);
-        actix_rt::spawn(async move { generate_finished_activities_for_today(&data.db).await });
+        tokio::spawn(async move {
+            data.db.acquire().await.unwrap();
+            generate_finished_activities_for_today(&data.db).await;
+            auto_review_finished_activities_for_today(&data.db).await;
+        });
     })
     .unwrap();
     sched.add(job).await.unwrap();
+    sched.start().await.unwrap();
+
+    // run on startup
+    generate_finished_activities_for_today(&pool).await;
+    auto_review_finished_activities_for_today(&pool).await;
 
     HttpServer::new(move || {
         App::new()

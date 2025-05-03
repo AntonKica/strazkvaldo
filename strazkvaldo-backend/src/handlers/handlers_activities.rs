@@ -1,12 +1,13 @@
 use crate::application_enums::Periodicity;
+use crate::handlers::handlers_settings::query_app_settings;
 use crate::model::{
     FinishedActivityResponse, OneTimeActivityModel, RepeatedActivityModel, UpcomingActivity,
     UpcomingActivityResponse,
 };
-use crate::schema::{FilterOptions, FinishedActivityModel};
+use crate::schema::{FilterOptions, FinishedActivityModel, ReviewFinishedActivityModel};
 use crate::AppState;
 use actix_web::http::header::*;
-use actix_web::{get, web, HttpResponse, Responder};
+use actix_web::{get, patch, web, HttpResponse, Responder};
 use chrono::{Datelike, Local, Months, NaiveDate, TimeDelta, Utc};
 use cron::Schedule;
 use sqlx::PgPool;
@@ -14,6 +15,15 @@ use std::ops::Add;
 use std::str::FromStr;
 use std::sync::Arc;
 
+fn filter_db_record(finished_activity_model: &FinishedActivityModel) -> FinishedActivityResponse {
+    FinishedActivityResponse {
+        code: finished_activity_model.code.clone(),
+        repeated_activity_code: finished_activity_model.repeated_activity_code.clone(),
+        one_time_activity_code: finished_activity_model.one_time_activity_code.clone(),
+        due_date: finished_activity_model.due_date.clone(),
+        description: finished_activity_model.description.clone(),
+    }
+}
 fn from_cron(cron: String) -> NaiveDate {
     Schedule::from_str(cron.as_str())
         .unwrap()
@@ -60,13 +70,13 @@ fn generate_occurences(
         Periodicity::Day => from_cron("0 0 0 * * * *".to_string()), // periodicity_unit is irrelevant
         Periodicity::Week => from_cron(format!("0 0 0 * * {periodicity_unit} *")), // periodicity_unit is day_of_week 0 = sunday, 6=saturday
         Periodicity::Month => from_cron(format!("0 0 0 {periodicity_unit} * * *")), // periodicity_unit is day_of_month 0 = sunday, 6=saturday
-        Periodicity::Year => NaiveDate::from_ymd_opt(Utc::now().year(), 1, 1)
+        Periodicity::Year => NaiveDate::from_ymd_opt(Utc::now().year() + 1, 1, 1)
             .unwrap()
             .add(TimeDelta::days(periodicity_unit as i64)), // periodicity_unit is day_of_year
     };
 
     let mut occurences = Vec::<NaiveDate>::with_capacity(future_count as usize);
-    for x in -1..=(future_count as i32 - 2) {
+    for x in -1..=(future_count as i32 - 1) {
         occurences.push(get_next_occurence_with_offset(
             &periodicity,
             &next_occurence,
@@ -74,19 +84,18 @@ fn generate_occurences(
         ));
     }
 
-    occurences
+    // previous one can be out of range
+    if occurences[0] < Local::now().naive_local().date() {
+        occurences[1..].to_owned()
+    } else {
+        occurences[0..(occurences.len() - 1)].to_owned()
+    }
 }
 #[get("/upcoming-activity")]
-pub async fn get_upcoming_activities(
-    data: web::Data<Arc<AppState>>,
-    opts: web::Query<FilterOptions>,
-) -> impl Responder {
-    //let limit = opts.limit.unwrap_or(10);
-    //let offset = (opts.page.unwrap_or(1) - 1) * limit;
-
+pub async fn get_upcoming_activities(data: web::Data<Arc<AppState>>) -> impl Responder {
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where date <= NOW() + interval '1 week'"#
+        r#"SELECT * FROM one_time_activity where due_date <= CURRENT_DATE + interval '1 week' and due_date >= CURRENT_DATE"#
     )
     .fetch_all(&data.db)
     .await
@@ -98,7 +107,7 @@ pub async fn get_upcoming_activities(
             name: ota.name,
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
-            due_date: ota.date.date_naive(),
+            due_date: ota.due_date,
         })
         .collect::<Vec<UpcomingActivity>>();
 
@@ -172,7 +181,7 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
 
     let one_time_activities: Vec<OneTimeActivityModel> = sqlx::query_as!(
         OneTimeActivityModel,
-        r#"SELECT * FROM one_time_activity where DATE(date) = CURRENT_DATE"#
+        r#"SELECT * FROM one_time_activity where DATE(due_date) = CURRENT_DATE"#
     )
     .fetch_all(db)
     .await
@@ -184,7 +193,7 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
             name: ota.name.clone(),
             repeated_activity_code: None::<String>,
             one_time_activity_code: Option::from(ota.code.clone()),
-            due_date: ota.date.date_naive(),
+            due_date: ota.due_date,
         })
         .collect();
     uas_all.append(&mut uas2);
@@ -256,8 +265,8 @@ pub async fn generate_finished_activities_for_today(db: &PgPool) {
     };
 }
 
-#[get("/finished-activity")]
-pub async fn get_finished_activity_list(
+#[get("/recently-finished-activity")]
+pub async fn get_recently_finished_activity_list(
     data: web::Data<Arc<AppState>>,
     opts: web::Query<FilterOptions>,
 ) -> impl Responder {
@@ -266,7 +275,7 @@ pub async fn get_finished_activity_list(
 
     let one_time_activities: Vec<FinishedActivityModel> = sqlx::query_as!(
         FinishedActivityModel,
-        r#"SELECT * FROM finished_activity LIMIT $1 OFFSET $2"#,
+        r#"SELECT * FROM finished_activity where reviewed = false LIMIT $1 OFFSET $2"#,
         limit as i64,
         offset as i64
     )
@@ -280,15 +289,134 @@ pub async fn get_finished_activity_list(
             code: note.code,
             repeated_activity_code: note.repeated_activity_code,
             one_time_activity_code: note.one_time_activity_code,
-            due_date: note.due_date.format("%d.%m.%Y").to_string(),
+            due_date: note.due_date,
             description: note.description,
-            reviewed: note.reviewed,
         })
         .collect::<Vec<FinishedActivityResponse>>();
 
     let json_response = serde_json::json!({
         "status": "success",
-        "finished_activities":one_time_activities_response
+        "recently_finished_activities":one_time_activities_response
     });
     HttpResponse::Ok().json(json_response)
+}
+
+#[get("/recently-finished-activity/{code}")]
+pub async fn get_recently_finished_activity(
+    path: web::Path<String>,
+    data: web::Data<Arc<AppState>>,
+    opts: web::Query<FilterOptions>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    match sqlx::query_as!(
+        FinishedActivityModel,
+        r#"SELECT * FROM finished_activity where code = $1"#,
+        code
+    )
+    .fetch_one(&data.db)
+    .await
+    {
+        Ok(recently_finished_activity) => {
+            let response = serde_json::json!({"status": "success", "data": serde_json::json!({ "recently_finished_activity": filter_db_record(&recently_finished_activity), })});
+            return HttpResponse::Ok().json(response);
+        }
+        Err(_) => {
+            let message = format!("Recently finished activity with ID: {} not found", code);
+            return HttpResponse::Ok()
+                .json(serde_json::json!({"status": "failure","message": message}));
+        }
+    }
+}
+
+#[patch("/recently-finished-activity/{code}/review")]
+pub async fn review_recently_finished_activity(
+    path: web::Path<String>,
+    body: web::Json<ReviewFinishedActivityModel>,
+    data: web::Data<Arc<AppState>>,
+) -> impl Responder {
+    let code = path.into_inner();
+    let query_result = sqlx::query_as!(
+        FinishedActivityModel,
+        "SELECT * FROM finished_activity WHERE code = $1",
+        code
+    )
+    .fetch_one(&data.db)
+    .await;
+
+    if query_result.is_err() {
+        let message = format!("Finished activity with code: {} not found", code);
+        return HttpResponse::Ok().json(serde_json::json!({"status": "fail","message": message}));
+    }
+
+    //let now = Utc::now();
+    //let note = query_result.unwrap();
+
+    let query_result = sqlx::query_as!(
+        FinishedActivityModel,
+        "UPDATE finished_activity SET description = $2, reviewed = true WHERE code = $1 RETURNING *",
+        code,
+        body.description.to_owned(),
+    ).fetch_one(&data.db)
+        .await
+        ;
+    match query_result {
+        Ok(note) => {
+            let note_response = serde_json::json!({"status": "success"});
+
+            HttpResponse::Ok().json(note_response)
+        }
+        Err(err) => {
+            let message = format!("Error: {:?}", err);
+            HttpResponse::Ok().json(serde_json::json!({"status": "error","message": message}))
+        }
+    }
+}
+#[get("/reviewed-finished-activity")]
+pub async fn get_reviewed_finished_activity_list(
+    data: web::Data<Arc<AppState>>,
+    opts: web::Query<FilterOptions>,
+) -> impl Responder {
+    let limit = opts.limit.unwrap_or(10);
+    let offset = (opts.page.unwrap_or(1) - 1) * limit;
+
+    let one_time_activities: Vec<FinishedActivityModel> = sqlx::query_as!(
+        FinishedActivityModel,
+        r#"SELECT * FROM finished_activity where reviewed = true LIMIT $1 OFFSET $2"#,
+        limit as i64,
+        offset as i64
+    )
+    .fetch_all(&data.db)
+    .await
+    .unwrap();
+
+    let one_time_activities_response = one_time_activities
+        .into_iter()
+        .map(|item| filter_db_record(&item))
+        .collect::<Vec<FinishedActivityResponse>>();
+
+    let json_response = serde_json::json!({
+        "status": "success",
+        "reviewed_finished_activities":one_time_activities_response
+    });
+    HttpResponse::Ok().json(json_response)
+}
+pub async fn auto_review_finished_activities_for_today(db: &PgPool) {
+    let app_settings = query_app_settings(db).await.unwrap();
+    if !app_settings.auto_review_finished_activity {
+        return;
+    }
+
+    match sqlx::query_as!(
+        FinishedActivityModel,
+        r#"UPDATE finished_activity SET reviewed = true, description = 'Aktivita bola automaticky uzavretá' where reviewed = false and EXTRACT(DAYS FROM AGE(CURRENT_DATE,  due_date)) >= $1"#,
+        app_settings.auto_review_finished_activity_days as i32 // sqlx objects when not cast
+    ).execute(db).await {
+        Ok(_) => (),
+        Err(err) => {
+            println!("Failed to auto review finished activities. {:?}", err);
+        }
+    }
 }

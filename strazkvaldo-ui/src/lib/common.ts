@@ -26,20 +26,8 @@ export function duration_in_seconds_to_string(duration_in_seconds: number): stri
     return res.trim();
 }
 
-export function datetime_rfc3339_to_string(datetime_rfc3339: string): string {
-    let date = new Date(Date.parse(datetime_rfc3339));
-    let res = `${date.getDate()}.${date.getMonth() + 1}.${date.getFullYear()}`;
-    return res;
-}
-export function to_html_date(datetime_rfc3339: string): string {
-    let date = new Date(Date.parse(datetime_rfc3339));
-    let res = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${(date.getDate()).toString().padStart(2, "0")}`;
-    return res;
-}
-export function from_html_date(html_date: string): string {
-    let [year, month, day ] = html_date.split("-").map(Number);
-
-    return new Date(year, month - 1, day).toISOString();
+export function timestamp_to_string(datetime_rfc3339: string): string {
+    return new Date(Date.parse(datetime_rfc3339)).toLocaleString("sk-SK");
 }
 export function to_hours(duration_in_seconds: number): number {
     return duration_in_seconds / 3600 >> 0;
@@ -49,4 +37,16 @@ export function to_minutes(duration_in_seconds: number): number {
 }
 export function to_duration_in_seconds(minutes: number, hours: number): number {
     return minutes * 60 + hours * 3600;
+}
+export function day_of_week_to_string(day_of_week: Number): string {
+    switch (day_of_week) {
+        case 1: return "pondelok";
+        case 2: return "utorok";
+        case 3: return "streda";
+        case 4: return "štvrtok";
+        case 5: return "piatok";
+        case 6: return "sobota";
+        case 7: return "nedeľa";
+        default: return "neznámy deň";
+    }
 }

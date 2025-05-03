@@ -2,12 +2,13 @@
 	import type { PageProps } from './$types';
     import { base } from '$app/paths';
     import { goto } from '$app/navigation';
-    import { SVC_ADMIN_APP_USER, SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
-    import { from_html_date, to_duration_in_seconds } from '$lib/common';
+    import { SVC_USER_ONE_TIME_ACTIVITY } from '$lib/serviceRoutes';
+    import { to_duration_in_seconds } from '$lib/common';
     
 	let { data }: PageProps = $props();
 	const activity_types = data.activity_types;
 	const criticality_types = data.criticality_types;
+	const rooms = data.rooms;
     
     const handleSubmit = async (event: SubmitEvent) => {
         event.preventDefault();
@@ -17,7 +18,6 @@
         
         const formatted_data = {
 			...formEntries,
-			date: from_html_date(formEntries.date),
 			duration_in_seconds: to_duration_in_seconds(Number(formEntries.duration_minutes), Number(formEntries.duration_hours))
         };
         
@@ -53,7 +53,14 @@
 			{/each}
         </select>
 	 </label> <br>
-	<label>dátum <input type="date" name="date"></label> <br>
+    <label> mietnosť 
+        <select name="room_code">
+			{#each rooms as room}
+				<option value={room.code}>{room.name}</option>
+			{/each}
+        </select>
+	 </label> <br>
+	<label>dátum <input type="date" name="due_date"></label> <br>
 	<label>trvanie 
 		<input type="number" name="duration_hours" min="0" max="24" step="1"> hodín
 		<input type="number" name="duration_minutes" min="0" max="60" step="1"> minút

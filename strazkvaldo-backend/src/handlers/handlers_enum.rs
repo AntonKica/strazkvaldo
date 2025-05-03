@@ -55,7 +55,7 @@ pub async fn get_enum(path: web::Path<String>, data: web::Data<Arc<AppState>>) -
 
     let enum_values: Vec<EnumModel> = sqlx::query_as!(
         EnumModel,
-        r#"SELECT * FROM enum_values WHERE name = $1"#,
+        r#"SELECT * FROM enum_values WHERE _removed = false and name = $1"#,
         name
     )
     .fetch_all(&data.db)
