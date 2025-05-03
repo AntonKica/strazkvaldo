@@ -1,14 +1,35 @@
 use crate::application_enums::CriticalityType;
 use crate::handlers::handlers_enum::{get_enum_for, get_enum_for_application_enum, EnumType};
 use crate::handlers::handlers_room::get_simple_room;
-use crate::model::{OneTimeActivityModel, OneTimeActivityModelResponse};
+use crate::model::{
+    OneTimeActivityModel, OneTimeActivityModelResponse, OneTimeActivitySimpleModelResponse,
+};
 use crate::schema::{CreateOneTimeActivity, FilterOptions, UpdateOneTimeActivity};
 use crate::AppState;
 use actix_web::http::header::*;
 use actix_web::{delete, http};
 use actix_web::{get, patch, post, web, HttpResponse, Responder};
+use sqlx::PgPool;
 use std::sync::Arc;
 
+pub async fn get_simple_one_time_activity(
+    code: String,
+    db: &PgPool,
+) -> OneTimeActivitySimpleModelResponse {
+    let activity: OneTimeActivityModel = sqlx::query_as!(
+        OneTimeActivityModel,
+        r#"SELECT * FROM one_time_activity where code = $1"#,
+        code
+    )
+    .fetch_one(db)
+    .await
+    .unwrap();
+
+    OneTimeActivitySimpleModelResponse {
+        code: activity.code,
+        name: activity.name,
+    }
+}
 async fn filter_db_record(
     one_time_activity_model: &OneTimeActivityModel,
     data: &web::Data<Arc<AppState>>,

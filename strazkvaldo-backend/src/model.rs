@@ -51,6 +51,11 @@ pub struct OneTimeActivityModelResponse {
     pub due_date: NaiveDate,
 }
 #[derive(Debug, Deserialize, Serialize)]
+pub struct OneTimeActivitySimpleModelResponse {
+    pub code: String,
+    pub name: String,
+}
+#[derive(Debug, Deserialize, Serialize)]
 pub struct RepeatedActivityModel {
     pub code: String,
     pub name: String,
@@ -75,6 +80,11 @@ pub struct RepeatedActivityModelResponse {
     pub description: String,
     pub periodicity: EnumModelResponse,
     pub periodicity_unit: i32,
+}
+#[derive(Debug, Deserialize, Serialize)]
+pub struct RepeatedActivitySimpleModelResponse {
+    pub code: String,
+    pub name: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -114,7 +124,6 @@ pub struct EnumModelResponse {
 
 #[derive(Debug)]
 pub struct UpcomingActivity {
-    pub name: String,
     pub repeated_activity_code: Option<String>,
     pub one_time_activity_code: Option<String>,
     pub due_date: NaiveDate,
@@ -122,9 +131,8 @@ pub struct UpcomingActivity {
 
 #[derive(Debug, Serialize)]
 pub struct UpcomingActivityResponse {
-    pub name: String,
-    pub repeated_activity_code: Option<String>,
-    pub one_time_activity_code: Option<String>,
+    pub repeated_activity: Option<RepeatedActivitySimpleModelResponse>,
+    pub one_time_activity: Option<OneTimeActivitySimpleModelResponse>,
     pub due_date: String,
 }
 
@@ -141,8 +149,8 @@ pub struct FinishedActivity {
 #[derive(Debug, Serialize)]
 pub struct FinishedActivityResponse {
     pub code: String,
-    pub repeated_activity_code: Option<String>,
-    pub one_time_activity_code: Option<String>,
+    pub repeated_activity: Option<RepeatedActivitySimpleModelResponse>,
+    pub one_time_activity: Option<OneTimeActivitySimpleModelResponse>,
     pub due_date: NaiveDate,
     pub description: String,
 }

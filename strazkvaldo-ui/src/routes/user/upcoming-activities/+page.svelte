@@ -12,23 +12,21 @@
 <table>
     <thead>
         <tr>
-            <td>názov</td>
-            <td>datum</td>
             <td>aktivita</td>
+            <td>datum</td>
         </tr>
     </thead>
     <tbody>
 {#each upcomingActivities as upcomingActivity}
 		<tr>
-            <td>{upcomingActivity.name}</td>
-            <td>{upcomingActivity.due_date}</td>
             <td>
-            {#if upcomingActivity.one_time_activity_code}
-                <a href={UI_USER_ONE_TIME_ACTIVITY.VIEW(upcomingActivity.one_time_activity_code)}>aktivita</a>
+            {#if upcomingActivity.one_time_activity}
+                <a href={UI_USER_ONE_TIME_ACTIVITY.VIEW(upcomingActivity.one_time_activity.code)}>{upcomingActivity.one_time_activity.name}</a>
             {:else}
-                <a href={UI_USER_REPEATED_ACTIVITY.VIEW(upcomingActivity.repeated_activity_code)}>aktivita</a>
+                <a href={UI_USER_REPEATED_ACTIVITY.VIEW(upcomingActivity.repeated_activity.code)}>{upcomingActivity.repeated_activity.name}</a>
             {/if}
             </td>
+            <td>{upcomingActivity.due_date}</td>
         </tr>
 {/each}
     </tbody>
