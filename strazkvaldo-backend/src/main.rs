@@ -97,6 +97,10 @@ async fn main() -> std::io::Result<()> {
     sched.add(job).await.unwrap();
     sched.start().await.unwrap();
 
+    // run on startup
+    generate_finished_activities_for_today(&pool).await;
+    auto_review_finished_activities_for_today(&pool).await;
+
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(Arc::clone(&app_data)))

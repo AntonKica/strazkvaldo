@@ -70,7 +70,7 @@ fn generate_occurences(
         Periodicity::Day => from_cron("0 0 0 * * * *".to_string()), // periodicity_unit is irrelevant
         Periodicity::Week => from_cron(format!("0 0 0 * * {periodicity_unit} *")), // periodicity_unit is day_of_week 0 = sunday, 6=saturday
         Periodicity::Month => from_cron(format!("0 0 0 {periodicity_unit} * * *")), // periodicity_unit is day_of_month 0 = sunday, 6=saturday
-        Periodicity::Year => NaiveDate::from_ymd_opt(Utc::now().year(), 1, 1)
+        Periodicity::Year => NaiveDate::from_ymd_opt(Utc::now().year() + 1, 1, 1)
             .unwrap()
             .add(TimeDelta::days(periodicity_unit as i64)), // periodicity_unit is day_of_year
     };
